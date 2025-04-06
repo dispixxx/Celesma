@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр проекта | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <title>Канбан-доска</title>
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #3a56cc;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --purple: #a64ca6;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            flex: 1;
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            /*transition: var(--transition);*/
+        }
+
+        .container:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            text-align: center;
+            font-family: "Orbitron", sans-serif;
+            font-weight: 600;
+            font-size: 24px;
+            color: var(--primary);
+            margin: 0 0 20px 0;
+        }
+
+        .project-name {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            /*margin-bottom: 20px;*/
+            padding: 6px 0;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Стили для заголовка */
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .kanban-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--primary);
+            border: 1px solid var(--light-gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Контейнер канбан-доски */
+        .kanban-container {
+            flex: 1;
+            background-color: var(--white);
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border-radius: var(--border-radius);
+            scroll-behavior: smooth;
+        }
+
+        /* Сама доска */
+        .kanban-board {
+            display: inline-flex;
+            gap: 15px;
+            padding: 5px 10px 20px 10px;
+            height: 100%;
+        }
+
+        /* Колонки */
+        .kanban-column {
+            width: 260px;
+            min-width: 260px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--box-shadow);
+            /*height: fit-content;*/
+            max-height: 100%;
+        }
+
+        /* Заголовок колонки */
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .column-count {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        /* Цвета колонок */
+        .new-column .column-header { background-color: var(--gray); }
+        .in-progress-column .column-header { background-color: var(--info); }
+        .review-column .column-header { background-color: var(--purple); }
+        .completed-column .column-header { background-color: var(--secondary); }
+        .on-hold-column .column-header { background-color: var(--warning); }
+        .canceled-column .column-header { background-color: var(--danger); }
+
+        /* Список задач */
+        .task-list {
+            flex: 1;
+            overflow-y: hidden; /* По умолчанию скрываем скролл */
+            min-height: calc(5 * 100px); /* Высота для 5 карточек (примерно) */
+            max-height: calc(5 * 100px); /* Высота для 5 карточек (примерно) */
+            background-color: rgba(245, 247, 250, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-list.scrollable {
+            overflow-y: auto;
+        }
+
+        /* Карточка задачи */
+        .task-card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid var(--light-gray);
+            min-height: 80px; /* Фиксированная минимальная высота карточки */
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--primary-dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .task-description {
+            font-size: 0.85em;
+            color: var(--dark-gray);
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: var(--dark-gray);
+        }
+
+        .task-assignee {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .assignee-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .task-priority {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: var(--danger);
+            border-left-color: var(--danger);
+        }
+
+        .priority-medium {
+            background-color: rgba(255, 184, 77, 0.1);
+            color: var(--warning);
+            border-left-color: var(--warning);
+        }
+
+        .priority-low {
+            background-color: rgba(111, 191, 115, 0.1);
+            color: var(--secondary);
+            border-left-color: var(--secondary);
+        }
+
+        /* Кнопка добавления задачи */
+        .add-task-btn {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px dashed var(--light-gray);
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--dark-gray);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+/*        .add-task-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: var(--primary);
+            color: var(--primary);
+        }*/
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .kanban-column {
+                width: 240px;
+                min-width: 240px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .kanban-board {
+                flex-wrap: wrap;
+                height: auto;
+                width: 100%;
+            }
+
+            .kanban-column {
+                width: calc(50% - 15px);
+                min-width: calc(50% - 15px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kanban-column {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+
+        /* Стили для скроллбара */
+        .kanban-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .kanban-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+            margin: 0 20px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Стили для скроллбара в списке задач */
+        .task-list::-webkit-scrollbar {
+            width: 8px; /* Ширина скроллбара */
+        }
+
+        .task-list::-webkit-scrollbar-track {
+            background: rgba(245, 247, 250, 0.5); /* Цвет трека */
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .task-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1; /* Цвет ползунка */
+            border-radius: 4px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; /* Цвет ползунка при наведении */
+        }
+
+        /* Улучшаем отступы для скролла */
+        .task-list {
+            padding-right: 5px; /* Добавляем место для скроллбара */
+        }
+
+        /* Делаем скроллбар более заметным при появлении */
+        .task-list.scrollable {
+            scrollbar-width: thin; /* Для Firefox */
+            scrollbar-color: #c1c1c1 rgba(245, 247, 250, 0.5); /* Для Firefox */
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kanban-column {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+
+
+<div class="main-content">
+    <div class="container">
+        <div class="page-header">
+            <button type="button" class="btn-back" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="project-name" th:text="${project.name}"></div>
+        </div><div class="kanban-header">
+        <h1 class="page-title">
+            <i class="fas fa-columns"></i> Канбан-доска
+        </h1>
+        <div class="kanban-actions">
+            <a th:href="@{/projects/{projectId}/tasks(projectId=${project.id})}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Список задач
+            </a>
+        </div>
+      </div><!-- Канбан-доска --><div class="kanban-container">
+        <div class="kanban-board">
+            <!-- Колонка "Новые" -->
+            <div class="kanban-column new-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Новые</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'NEW'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="new-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'NEW'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="add-task-btn">
+                    <a th:href="@{/projects/{projectId}/tasks/create(projectId=${project.id})}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Создать задачу
+                    </a>
+                </button>
+            </div>
+            <!-- Колонка "В работе" -->
+            <div class="kanban-column in-progress-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-spinner"></i>
+                        <span>В работе</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'IN_PROGRESS'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="in-progress-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'IN_PROGRESS'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Колонка "На проверке" -->
+            <div class="kanban-column review-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-search"></i>
+                        <span>На проверке</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'REVIEW'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="review-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'REVIEW'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Колонка "Завершено" -->
+            <div class="kanban-column completed-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Завершено</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'COMPLETED'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="completed-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'COMPLETED'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Колонка "На паузе" -->
+            <div class="kanban-column on-hold-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-pause-circle"></i>
+                        <span>На паузе</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'ON_HOLD'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="on-hold-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'ON_HOLD'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Колонка "Отменено" -->
+            <div class="kanban-column canceled-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Отменено</span>
+                        <span class="column-count" th:text="${#lists.size(tasks.?[status.toString() == 'CANCELED'])}">0</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="task-list" id="canceled-tasks">
+                    <div class="task-card" th:each="task : ${tasks}"
+                         th:if="${task.status.toString() == 'CANCELED'}"
+                         th:attr="data-task-id=${task.id}"
+                         th:classappend="${task.priority.toString() == 'HIGH'} ? 'priority-high' :
+                            (${task.priority.toString() == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                        <div class="task-title" th:text="${task.title}">Название задачи</div>
+                        <div class="task-description" th:text="${task.description}">Описание задачи</div>
+                        <div class="task-footer">
+                            <div class="task-assignee" th:if="${task.assignee != null}">
+                                <div class="assignee-avatar" th:text="${#strings.substring(task.assignee.username, 0, 1).toUpperCase()}"></div>
+                                <span th:text="${task.assignee.username}"></span>
+                            </div>
+                            <span class="task-priority" th:text="${task.priority}">Приоритет</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверяем количество задач в каждой колонке и добавляем скролл при необходимости
+        document.querySelectorAll('.task-list').forEach(list => {
+            if (list.children.length > 4) {
+                list.classList.add('scrollable');
+            }
+        });
+
+        const column = this.closest('.kanban-column');
+        // После добавления новой задачи проверяем нужно ли добавить скролл
+        const taskList = column.querySelector('.task-list');
+        if (taskList.children.length > 4) {
+            taskList.classList.add('scrollable');
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем kanban-container элемент
+        const kanbanContainer = document.querySelector('.kanban-container');
+        const taskLists = document.querySelectorAll('.task-list');
+
+        // Обработчик события wheel для всего документа
+        document.addEventListener('wheel', function(event) {
+            // Получаем текущую позицию курсора мыши
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            // Проверяем, находится ли курсор мыши над task-list
+            let isOverTaskList = false;
+            taskLists.forEach(taskList => {
+                const rect = taskList.getBoundingClientRect();
+                if ((mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) && taskList.children.length>4) {
+                    isOverTaskList = true;
+                }
+            });
+
+            // Если курсор мыши над task-list, разрешаем прокрутку task-list и отключаем прокрутку страницы
+            if (isOverTaskList) {
+                event.preventDefault(); // Отменяем стандартное поведение прокрутки страницы
+                return; // Выходим из обработчика, чтобы task-list мог прокручиваться сам
+            }
+
+            // Если курсор мыши не над task-list, прокручиваем kanban-container
+            const scrollAmount = event.deltaY > 0 ? 50 : -50; // Размер прокрутки
+            kanbanContainer.scrollLeft += scrollAmount;
+        });
+    });
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const project = {
+        id: /*[[${project.id}]]*/ 0,
+    };
+    /*]]>*/
+</script>
+
+<script>
+    // Обработчик клика на карточку задачи
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Проверяем, не был ли клик по ссылке внутри карточки
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return;
+            }
+
+            const taskId = this.getAttribute('data-task-id');
+            // Переходим на страницу задачи
+            window.location.href = `/projects/${project.id}/tasks/${taskId}`;
+        });
+    });
+</script>
+
+
+
+</body>
+</html>

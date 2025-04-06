@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Просмотр проекта | TaskFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+  <style>
+    :root {
+      --primary: #3366ff;
+      --primary-dark: #3a56cc;
+      --secondary: #6fbf73;
+      --danger: #ff6666;
+      --warning: #ffb84d;
+      --info: #6c8cff;
+      --purple: #a64ca6;
+      --gray: #a0a0a0;
+      --light-gray: #f5f7fa;
+      --dark-gray: #6c757d;
+      --white: #ffffff;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      /*background-color: #f8f9fa;*/
+      background: linear-gradient(to right, #eef2ff, #cfd9ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    /* Карточка проекта */
+    .project-card {
+      flex: 2;
+      background: var(--white);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    .project-card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .project-title {
+      font-family: "Orbitron", sans-serif;
+      font-weight: 600;
+      font-size: 28px;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .project-id {
+      font-size: 14px;
+      color: var(--dark-gray);
+      background: var(--light-gray);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .project-description {
+      background: var(--light-gray);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .project-description p {
+      margin: 0;
+    }
+
+    /* Блок участников */
+    .members-card {
+      flex: 1;
+      background: var(--white);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      height: fit-content;
+      position: sticky;
+      /*top: 100px;*/
+    }
+
+    .members-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .members-title i {
+      font-size: 18px;
+    }
+
+    .members-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .member-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .member-item:last-child {
+      border-bottom: none;
+    }
+
+    .member-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      margin-right: 12px;
+    }
+
+    .member-name {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .member-role {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .role-admin {
+      background-color: rgba(255, 0, 0, 0.1);
+      color: var(--danger);
+    }
+
+    .role-moderator {
+      background-color: rgba(0, 128, 0, 0.1);
+      color: var(--secondary);
+    }
+
+    .role-member {
+      background-color: rgba(74, 107, 255, 0.1);
+      color: var(--primary);
+    }
+
+    /* Кнопки */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 20px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      border: solid 1px;
+      border-color: var(--light-gray);
+      background-color: var(--light-gray);
+      color: var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--white-hover);
+      transform: translateY(-2px);
+      border: solid 1px;
+      border-color: var(--primary);
+    }
+
+    .btn-success {
+      background-color: var(--secondary);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #5ca360;
+      transform: translateY(-2px);
+    }
+
+    .btn-disabled {
+      background-color: var(--white-hover) !important;
+      color: #adb5bd !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+    }
+
+      .btn-back {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      /*margin-bottom: 20px;*/
+      padding: 6px 0;
+      transition: var(--transition);
+    }
+
+    .btn-back:hover {
+      color: var(--primary-dark);
+    }
+
+    /* Прогресс проекта */
+    .progress-section {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid #eee;
+    }
+
+    .progress-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .progress-circle {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      position: relative;
+      background: #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    .progress-circle::before {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--white);
+      top: 15px;
+      left: 15px;
+    }
+
+    .progress-stats {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stat-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .stat-label {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--dark-gray);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 992px) {
+      .main-content {
+        flex-direction: column;
+      }
+
+      .members-card {
+        position: static;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .project-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .progress-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .project-card, .members-card {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Тултипы */
+    [data-tooltip] {
+      position: relative;
+      cursor: pointer;
+    }
+
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 100;
+      min-width: 120px;
+      max-width: 250px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    [data-tooltip]:hover::after {
+      opacity: 1;
+      visibility: visible;
+      bottom: calc(100% + 8px);
+    }
+
+    /* Для многострочных тултипов */
+    [data-tooltip].multiline::after {
+      white-space: normal;
+      width: max-content;
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+  <div class="project-card">
+    <button type="button" class="btn-back" onclick="history.back()">
+      <i class="fas fa-arrow-left"></i> Назад
+    </button>
+
+    <div class="project-header">
+      <h1 class="project-title" th:text="${project.name}">Название проекта</h1>
+      <span class="project-id" th:text="'ID: ' + ${project.id}">ID проекта</span>
+    </div>
+
+    <div class="project-description">
+      <p><strong>Описание:</strong> <span th:text="${project.description}"></span></p>
+    </div>
+
+    <div class="action-buttons">
+      <!-- Кнопка для перехода на канбан-доску -->
+      <div th:if="${isMember}">
+        <a th:href="@{/projects/{projectId}/kanban(projectId=${project.id})}" class="btn btn-primary">
+          <i class="fas fa-columns"></i> Канбан-доска
+        </a>
+      </div>
+
+      <!-- Кнопка для создания задачи -->
+      <div th:if="${isMember}">
+        <a th:href="@{/projects/{projectId}/tasks/create(projectId=${project.id})}" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Создать задачу
+        </a>
+      </div>
+
+      <!-- Кнопка просмотра задач -->
+      <div th:if="${isMember}">
+        <a th:href="@{/projects/{projectId}/tasks(projectId=${project.id})}" class="btn btn-primary">
+          <i class="fas fa-tasks"></i> Просмотреть задачи
+        </a>
+      </div>
+
+      <div th:unless="${isMember}">
+        <div th:if="${isApplicant}">
+          <a class="btn btn-disabled">
+            <i class="fas fa-hourglass-half"></i> Заявка на рассмотрении
+          </a>
+        </div>
+        <div th:unless="${isApplicant}">
+          <a id="joinRequestButton" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Вступить в проект
+          </a>
+        </div>
+      </div>
+
+      <div th:if="${isAdminOrModerator}">
+        <a th:href="@{/projects/{projectId}/manage(projectId=${project.id})}" class="btn btn-secondary">
+          <i class="fas fa-cog"></i> Управление проектом
+        </a>
+      </div>
+    </div>
+
+    <div class="progress-section" th:if="${isMember}">
+      <h3 class="progress-title">
+        <i class="fas fa-chart-pie"></i> Прогресс проекта
+      </h3>
+
+      <input type="hidden" id="newTasks" th:value="${newTasks}">
+      <input type="hidden" id="inProgressTasks" th:value="${inProgressTasks}">
+      <input type="hidden" id="reviewTasks" th:value="${reviewTasks}">
+      <input type="hidden" id="completedTasks" th:value="${completedTasks}">
+      <input type="hidden" id="onHoldTasks" th:value="${onHoldTasks}">
+      <input type="hidden" id="canceledTasks" th:value="${canceledTasks}">
+      <input type="hidden" id="totalTasks" th:value="${totalTasks}">
+
+      <div class="progress-container">
+        <div class="progress-circle"></div>
+
+        <div class="progress-stats">
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--gray);"></span>
+            <span class="stat-label">Новые</span>
+            <span class="stat-value" th:text="${newTasks}">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--info);"></span>
+            <span class="stat-label">В процессе</span>
+            <span class="stat-value" th:text="${inProgressTasks}">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--purple);"></span>
+            <span class="stat-label">На проверке</span>
+            <span class="stat-value" th:text="${reviewTasks}">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--secondary);"></span>
+            <span class="stat-label">Завершённые</span>
+            <span class="stat-value" th:text="${completedTasks}">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--warning);"></span>
+            <span class="stat-label">На паузе</span>
+            <span class="stat-value" th:text="${onHoldTasks}">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-color" style="background-color: var(--danger);"></span>
+            <span class="stat-label">Отменённые</span>
+            <span class="stat-value" th:text="${canceledTasks}">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="members-card">
+    <h2 class="members-title">
+      <i class="fas fa-users"></i> Участники проекта
+      <span class="project-id" th:text="'(' + ${members.size()} + ')'"></span>
+    </h2>
+
+    <ul class="members-list">
+      <li class="member-item" th:each="member : ${members}">
+        <div class="member-avatar" th:text="${#strings.substring(member.user.username, 0, 1).toUpperCase()}"></div>
+        <span class="member-name" th:text="${member.user.username}"></span>
+        <span class="member-role"
+              th:classappend="${member.role eq projectRoles[0]} ? 'role-admin' :
+                     (${member.role eq projectRoles[1]} ? 'role-moderator' : 'role-member')"
+              th:text="${member.role eq projectRoles[0]} ? 'Админ' :
+               (${member.role eq projectRoles[1]} ? 'Модератор' : 'Участник')">
+</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+
+<script>
+  document.getElementById('joinRequestButton')?.addEventListener('click', function() {
+    const projectId = [[${project.id}]];
+    const userId = [[${currentUser.id}]];
+
+    fetch(`/projects/${projectId}/join`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ projectId: projectId })
+    })
+            .then(response => {
+              if (response.ok) {
+                // Показываем красивый toast вместо alert
+                showToast('Заявка успешно отправлена!', 'success');
+                setTimeout(() => location.reload(), 1000);
+              } else {
+                showToast('Ошибка при отправке заявки', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              showToast('Произошла ошибка', 'error');
+            });
+  });
+
+  // Функция для показа toast-уведомлений
+  function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '4px';
+    toast.style.color = 'white';
+    toast.style.fontWeight = '500';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.zIndex = '1000';
+    toast.style.animation = 'fadeIn 0.3s ease-out';
+
+    if (type === 'success') {
+      toast.style.backgroundColor = '#28a745';
+    } else {
+      toast.style.backgroundColor = '#dc3545';
+    }
+
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.3s ease-out';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const newTasks = parseInt(document.getElementById("newTasks").value);
+    const inProgressTasks = parseInt(document.getElementById("inProgressTasks").value);
+    const reviewTasks = parseInt(document.getElementById("reviewTasks").value);
+    const completedTasks = parseInt(document.getElementById("completedTasks").value);
+    const onHoldTasks = parseInt(document.getElementById("onHoldTasks").value);
+    const canceledTasks = parseInt(document.getElementById("canceledTasks").value);
+    const totalTasks = parseInt(document.getElementById("totalTasks").value);
+
+    const progressCircle = document.querySelector(".progress-circle");
+
+    if (totalTasks === 0) {
+      progressCircle.style.background = "#f0f0f0";
+    } else {
+      const newPercentage = (newTasks / totalTasks) * 100;
+      const inProgressPercentage = (inProgressTasks / totalTasks) * 100;
+      const reviewPercentage = (reviewTasks / totalTasks) * 100;
+      const completedPercentage = (completedTasks / totalTasks) * 100;
+      const onHoldPercentage = (onHoldTasks / totalTasks) * 100;
+      const canceledPercentage = (canceledTasks / totalTasks) * 100;
+
+      const gradient = `conic-gradient(
+        var(--gray) 0%,
+        var(--gray) ${newPercentage}%,
+        var(--info) ${newPercentage}%,
+        var(--info) ${newPercentage + inProgressPercentage}%,
+        var(--purple) ${newPercentage + inProgressPercentage}%,
+        var(--purple) ${newPercentage + inProgressPercentage + reviewPercentage}%,
+        var(--secondary) ${newPercentage + inProgressPercentage + reviewPercentage}%,
+        var(--secondary) ${newPercentage + inProgressPercentage + reviewPercentage + completedPercentage}%,
+        var(--warning) ${newPercentage + inProgressPercentage + reviewPercentage + completedPercentage}%,
+        var(--warning) ${newPercentage + inProgressPercentage + reviewPercentage + completedPercentage + onHoldPercentage}%,
+        var(--danger) ${newPercentage + inProgressPercentage + reviewPercentage + completedPercentage + onHoldPercentage}%,
+        var(--danger) 100%
+      )`;
+
+      progressCircle.style.background = gradient;
+    }
+  });
+</script>
+
+</body>
+</html>

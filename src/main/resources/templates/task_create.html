@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать задачу | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #3a56cc;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --purple: #a64ca6;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --white-hover: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .page-title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 600;
+            font-size: 24px;
+            color: var(--primary);
+            margin: 15px 0 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .project-name {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+            transition: var(--transition);
+            order: -1;
+        }
+
+        .btn-back:hover {
+            color: var(--primary-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        .priority-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .priority-option {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .priority-option:hover {
+            background-color: var(--light-gray);
+        }
+
+        .priority-option.selected {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .priority-low {
+            border-color: #6fbf73;
+        }
+
+        .priority-low.selected {
+            background-color: #6fbf73;
+        }
+
+        .priority-medium {
+            border-color: #ffb84d;
+        }
+
+        .priority-medium.selected {
+            background-color: #ffb84d;
+        }
+
+        .priority-high {
+            border-color: #ff6666;
+        }
+
+        .priority-high.selected {
+            background-color: #ff6666;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%233366ff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .date-picker {
+            position: relative;
+        }
+
+        .date-picker i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        #description, #title{
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <div class="page-header">
+            <button type="button" class="btn-back" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="project-name" th:text="${projectName}"></div>
+        </div>
+
+        <h1 class="page-title">
+            <i class="fas fa-plus-circle"></i> Создать задачу
+        </h1>
+
+        <form th:action="@{/projects/{projectId}/tasks/create(projectId=${projectId})}" method="post">
+            <div class="form-group">
+                <label for="title" class="form-label">Название задачи</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="Введите название задачи" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Описание</label>
+                <textarea id="description" name="description" class="form-control"
+                          maxlength="500" oninput="updateCharCount()"
+                          placeholder="Опишите детали задачи" required></textarea>
+                <div id="charCount" class="char-count">0 / 500</div>
+            </div>
+
+            <div class="form-group">
+                <label for="assigneeId" class="form-label">Исполнитель</label>
+                <select id="assigneeId" name="assigneeId" class="form-control form-select" required>
+                    <option value="" disabled selected>Выберите исполнителя</option>
+                    <option th:each="member : ${members}" th:value="${member.user.id}"
+                            th:text="${member.user.username} + (${member.user.id == creatorId} ? ' (вы)' : '')">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Приоритет</label>
+                <div class="priority-selector">
+                    <div class="priority-option priority-low" data-value="LOW" onclick="selectPriority(this)">
+                        <i class="fas fa-arrow-down"></i> Низкий
+                    </div>
+                    <div class="priority-option priority-medium selected" data-value="MEDIUM" onclick="selectPriority(this)">
+                        <i class="fas fa-equals"></i> Средний
+                    </div>
+                    <div class="priority-option priority-high" data-value="HIGH" onclick="selectPriority(this)">
+                        <i class="fas fa-arrow-up"></i> Высокий
+                    </div>
+                </div>
+                <input type="hidden" id="priority" name="priority" value="MEDIUM">
+            </div>
+
+            <div class="form-group">
+                <label for="endDate" class="form-label">Срок выполнения</label>
+                <div class="date-picker">
+                    <input type="date" id="endDate" name="endDate" class="form-control"
+                           oninput="this.style.color = this.value ? 'var(--dark-gray)' : 'var(--gray)'"
+                           style="color: var(--gray);">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-plus"></i> Создать задачу
+            </button>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+
+<script>
+    function updateCharCount() {
+        const textarea = document.getElementById("description");
+        const charCount = document.getElementById("charCount");
+        charCount.textContent = `${textarea.value.length} / 500`;
+    }
+
+    function selectPriority(element) {
+        // Убираем выделение со всех вариантов
+        document.querySelectorAll('.priority-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+
+        // Добавляем выделение выбранному варианту
+        element.classList.add('selected');
+
+        // Устанавливаем значение в скрытое поле
+        document.getElementById('priority').value = element.getAttribute('data-value');
+    }
+
+    // Инициализация счетчика символов при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCharCount();
+    });
+</script>
+</body>
+</html>

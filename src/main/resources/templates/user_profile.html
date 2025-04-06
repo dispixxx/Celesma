@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль пользователя | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #3a56cc;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --purple: #a64ca6;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+            gap: 24px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .profile-title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 600;
+            font-size: 28px;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        /* User Info Section */
+        .user-profile {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 3px solid var(--light-gray);
+            transition: var(--transition);
+        }
+
+        .avatar-container.editable-avatar {
+            border: 3px dashed var(--primary);
+            cursor: pointer;
+        }
+
+        #userAvatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-edit-icon {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            display: none;
+        }
+
+        .avatar-edit-icon i {
+            color: white;
+            font-size: 18px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .username {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            /*gap: 10px;*/
+        }
+
+        .username-prefix {
+            color: var(--dark-gray);
+            font-weight: 400;
+        }
+
+        .name-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            transform: translateX(-10px);
+        }
+
+        .name-field {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2C2F33;
+        }
+
+        .user-email {
+            color: var(--dark-gray);
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .settings-icon {
+            cursor: pointer;
+            font-size: 22px;
+            color: var(--primary);
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .settings-icon:hover {
+            background-color: rgba(51, 102, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        /* Editable Fields */
+        .editable {
+            border: 2px dashed transparent;
+            padding: 5px 8px;
+            border-radius: 4px;
+            transition: var(--transition);
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        .editable.active {
+            border-color: var(--primary);
+            background: rgba(51, 102, 255, 0.05);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--dark-gray);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Activity Section */
+        .activity-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.4s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-item {
+            background: var(--white);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .activity-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(51, 102, 255, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .activity-time {
+            color: var(--gray);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        /* Save Button */
+        .save-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .save-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Image Editor */
+        #imageEditor {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            border-radius: var(--border-radius);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            max-width: 90%;
+            max-height: 90vh;
+        }
+
+        #editorHeader {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        #backButton {
+            font-size: 20px;
+            color: var(--primary);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            padding: 8px;
+            transition: var(--transition);
+        }
+
+        #backButton:hover {
+            background-color: rgba(51, 102, 255, 0.1);
+        }
+
+        #editorContent {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #imageToCrop {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        #editorFooter {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #cropButton {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        #cropButton:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Cropper Styles */
+        .cropper-crop-box, .cropper-view-box {
+            border-radius: 50%;
+        }
+
+        .cropper-view-box {
+            box-shadow: 0 0 0 1px #fff;
+            outline: 1px solid rgba(51, 102, 255, 0.8);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideRight {
+            from { transform: translateX(0); }
+            to { transform: translateX(5px); }
+        }
+
+        @keyframes slideLeft {
+            from { transform: translateX(5px); }
+            to { transform: translateX(0); }
+        }
+
+        .slide-right {
+            animation: slideRight 0.3s ease-out forwards;
+        }
+
+        .slide-left {
+            animation: slideLeft 0.3s ease-out forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .user-profile {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .user-details {
+                text-align: center;
+            }
+
+            .username {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div id="imageEditor">
+    <div id="editorHeader">
+        <i class="fas fa-arrow-left" id="backButton"></i>
+    </div>
+    <div id="editorContent">
+        <img id="imageToCrop" src="" alt="Изображение для обрезки">
+    </div>
+    <div id="editorFooter">
+        <button id="cropButton">Обрезать</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h1 class="profile-title">Мой профиль</h1>
+            <i class="fas fa-cog settings-icon" onclick="toggleEditMode()"></i>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar-container" id="avatarContainer">
+                <img id="userAvatar" th:src="${userAvatarUrl ?: '/image/logo.png'}" alt="Аватар">
+                <div id="avatarEditIcon" class="avatar-edit-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="user-details">
+                <h1 class="username">
+                    <span class="username-prefix">@</span>
+                    <span th:text="${username}"></span>
+                </h1>
+
+                <div class="name-fields">
+                    <div class="name-field">
+                        <span class="editable" id="edit-firstname" contenteditable="false" th:text="${userFirstName}"></span>
+                    </div>
+                    <div class="name-field">
+                        <span class="editable" id="edit-lastname" contenteditable="false" th:text="${userLastName}"></span>
+                    </div>
+                </div>
+
+                <p class="user-email" th:text="${userEmail}"></p>
+            </div>
+        </div>
+
+        <button class="save-btn" id="saveChanges" onclick="saveChanges()">Сохранить изменения</button>
+
+        <div class="stats-section">
+            <h3 class="section-title"><i class="fas fa-chart-bar"></i> Статистика</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Участие в проектах</h3>
+                    <p class="stat-value" th:text="${projectCount}">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Созданные задачи</h3>
+                    <p class="stat-value" th:text="${taskCountAsCreator}">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Исполняемые задачи</h3>
+                    <p class="stat-value" th:text="${taskCountAsAssignee}">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Завершено задач</h3>
+                    <p class="stat-value" th:text="${completedTaskCount}">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-section">
+        <h3 class="section-title"><i class="fas fa-history"></i> Последняя активность</h3>
+        <ul class="activity-list">
+            <li class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-text">Завершена задача "Дизайн интерфейса"</p>
+                    <p class="activity-time">2 часа назад</p>
+                </div>
+            </li>
+            <li class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-text">Добавлен новый проект "Футуристичный дизайн"</p>
+                    <p class="activity-time">5 часов назад</p>
+                </div>
+            </li>
+            <li class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-comment-alt"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-text">Оставлен комментарий к задаче "Обновить логотип"</p>
+                    <p class="activity-time">Вчера, 14:30</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<script>
+    let originalAvatar = document.getElementById("userAvatar").src;
+    let editables = document.querySelectorAll('.editable');
+    let originalValues = {};
+    let isEditMode = false;
+    let cropper;
+
+    // Toggle edit mode
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        const avatarContainer = document.getElementById("avatarContainer");
+        const avatarEditIcon = document.getElementById("avatarEditIcon");
+        const lastNameElement = document.getElementById("edit-lastname");
+        const firstNameElement = document.getElementById("edit-firstname");
+
+        if (isEditMode) {
+            originalValues = {};
+            editables.forEach(el => {
+                originalValues[el.id] = el.innerText;
+                el.contentEditable = "true";
+                el.classList.add("active");
+            });
+            avatarContainer.classList.add("editable-avatar");
+            avatarEditIcon.style.display = "flex";
+            document.getElementById("saveChanges").style.display = "block";
+            lastNameElement.classList.remove("slide-left");
+            firstNameElement.classList.remove("slide-left");
+            lastNameElement.classList.add("slide-right");
+            firstNameElement.classList.add("slide-right");
+        } else {
+            editables.forEach(el => {
+                el.innerText = originalValues[el.id];
+                el.contentEditable = "false";
+                el.classList.remove("active");
+            });
+            avatarContainer.classList.remove("editable-avatar");
+            avatarEditIcon.style.display = "none";
+            document.getElementById("saveChanges").style.display = "none";
+            document.getElementById("userAvatar").src = originalAvatar;
+            lastNameElement.classList.remove("slide-right");
+            firstNameElement.classList.remove("slide-right");
+            lastNameElement.classList.add("slide-left");
+            firstNameElement.classList.add("slide-left");
+        }
+    }
+
+    // Avatar click handler
+    document.getElementById("avatarContainer").addEventListener("click", () => {
+        if (isEditMode) {
+            document.getElementById("avatarInput").click();
+        }
+    });
+
+    // Avatar file input handler
+    document.getElementById("avatarInput").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const image = document.getElementById("imageToCrop");
+                image.src = e.target.result;
+                document.getElementById("imageEditor").style.display = "flex";
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    guides: false,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Crop button handler
+    document.getElementById("cropButton").addEventListener("click", () => {
+        if (cropper) {
+            const croppedCanvas = cropper.getCroppedCanvas();
+            const croppedImage = document.getElementById("userAvatar");
+            croppedImage.src = croppedCanvas.toDataURL();
+            document.getElementById("imageEditor").style.display = "none";
+            cropper.destroy();
+            cropper = null;
+        }
+    });
+
+    // Back button handler
+    document.getElementById("backButton").addEventListener("click", () => {
+        document.getElementById("imageEditor").style.display = "none";
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        document.getElementById("avatarInput").value = "";
+    });
+
+    // Save changes
+    function saveChanges() {
+        const userData = {
+            firstName: document.getElementById("edit-firstname").innerText,
+            lastName: document.getElementById("edit-lastname").innerText,
+            avatar: document.getElementById("userAvatar").src
+        };
+
+        fetch('/api/user/updateProfile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    showToast('Данные успешно сохранены!', 'success');
+                    document.getElementById("saveChanges").style.display = "none";
+                    document.querySelectorAll('.editable').forEach(el => {
+                        el.contentEditable = "false";
+                        el.classList.remove("active");
+                    });
+                    document.getElementById("avatarContainer").classList.remove("editable-avatar");
+                    document.getElementById("avatarEditIcon").style.display = "none";
+                    originalAvatar = document.getElementById("userAvatar").src;
+                    document.getElementById("edit-lastname").classList.remove("slide-right");
+                    document.getElementById("edit-firstname").classList.remove("slide-right");
+                    document.getElementById("edit-lastname").classList.add("slide-left");
+                    document.getElementById("edit-firstname").classList.add("slide-left");
+                    isEditMode = false;
+                } else {
+                    showToast('Ошибка при сохранении данных', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
+            });
+    }
+
+    // Toast notification
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '4px';
+        toast.style.color = 'white';
+        toast.style.fontWeight = '500';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        toast.style.zIndex = '1000';
+        toast.style.animation = 'fadeIn 0.3s ease-out';
+
+        if (type === 'success') {
+            toast.style.backgroundColor = '#28a745';
+        } else {
+            toast.style.backgroundColor = '#dc3545';
+        }
+
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>

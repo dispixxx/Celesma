@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Мои задачи | TaskFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+  <style>
+
+    :root {
+      --primary: #3366ff;
+      --primary-dark: #3a56cc;
+      --secondary: #6fbf73;
+      --danger: #ff6666;
+      --warning: #ffb84d;
+      --info: #6c8cff;
+      --purple: #a64ca6;
+      --gray: #a0a0a0;
+      --light-gray: #f5f7fa;
+      --dark-gray: #6c757d;
+      --white: #ffffff;
+      --white-hover:#e9ecef;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(to right, #eef2ff, #cfd9ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    .main-content {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      flex: 1;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      text-align: center;
+      font-family: "Orbitron", sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      color: var(--primary);
+      margin: 0 0 20px 0;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      /*margin-bottom: 20px;*/
+      padding: 6px 0;
+      transition: var(--transition);
+    }
+
+    .btn-back:hover {
+      color: var(--primary-dark);
+    }
+
+    /* Фильтры и кнопки */
+    .filters-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+    }
+
+    .sort-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sort-group label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .sort-group select {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ddd;
+      font-size: 14px;
+      background-color: var(--white);
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border-radius: 5px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--light-gray);
+      color: var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--white-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-active {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+
+    /* Список задач */
+    .task-list {
+      list-style-type: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .task-list.grid-2x2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .task-list.grid-3x3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .task-card {
+      background: var(--white);
+      border: 1px solid #e0e0e0;
+      border-radius: var(--border-radius);
+      padding: 16px;
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .task-card:hover {
+      /*transform: translateY(-3px);*/
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      border-color: var(--primary);
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .task-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .star-icon {
+      color: #ddd;
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-left: 8px;
+    }
+
+    .star-icon.active {
+      color: #ffcc00;
+    }
+
+    /* Статусы задач */
+    .task-status {
+      display: inline-block;
+      padding: 2px 4px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      text-transform: uppercase;
+      margin: 10px 0;
+    }
+
+    .status-NEW { background-color: var(--gray); }
+    .status-IN_PROGRESS { background-color: var(--info); }
+    .status-REVIEW { background-color: var(--purple); }
+    .status-COMPLETED { background-color: var(--secondary); }
+    .status-ON_HOLD { background-color: var(--warning); }
+    .status-CANCELED { background-color: var(--danger); }
+
+    .task-meta {
+      font-size: 13px;
+      color: var(--dark-gray);
+      margin-bottom: 8px;
+    }
+
+    .task-meta strong {
+      color: #555;
+    }
+
+    .days-left {
+      font-weight: 600;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .days-left.warning {
+      color: var(--warning);
+    }
+
+    .days-left.danger {
+      color: var(--danger);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .task-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 13px;
+      border-radius: var(--border-radius);
+    }
+
+    .details-btn {
+      background-color: var(--light-gray);
+      color: var(--primary);
+    }
+
+    .details-btn:hover {
+      background-color: #e0e7ff;
+    }
+
+    .view-btn {
+      background-color: var(--secondary);
+      color: white;
+    }
+
+    .view-btn:hover {
+      background-color: #5ca360;
+    }
+
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100vw; /* Cover the entire viewport width */
+      height: 100vh; /* Cover the entire viewport height */
+      background-color: rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s;
+    }
+
+    .modal-content {
+      background-color: var(--white);
+      margin: auto;
+      padding: 24px;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      position: fixed; /* Fixed position */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); /* Center the modal */
+    }
+
+    .close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      color: var(--dark-gray);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .close:hover {
+      color: var(--primary);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-row {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .modal-row strong {
+      display: inline-block;
+      min-width: 100px;
+      color: var(--dark-gray);
+    }
+
+    .modal-description {
+      background: var(--light-gray);
+      padding: 12px;
+      border-radius: var(--border-radius);
+      margin-top: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      /*justify-content: space-between;*/
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 24px;
+      color: var(--primary);
+      /*flex-grow: 1;*/
+    }
+
+    .modal-star-icon {
+      color: #ddd;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+
+    .modal-star-icon.active {
+      color: #ffcc00;
+    }
+
+    .modal-star-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-row {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .modal-row strong {
+      display: inline-block;
+      min-width: 100px;
+      color: #555;
+    }
+
+    .modal-description {
+      background: #e0e7ff;
+      padding: 12px;
+      border-radius: 5px;
+      margin-top: 16px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 992px) {
+      .task-list.grid-3x3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .filters-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .task-list.grid-2x2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Секции */
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      color: #ddd;
+      margin-bottom: 16px;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+  <div class="container">
+    <div class="page-header">
+      <button type="button" class="btn-back" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i> Назад
+      </button>
+    </div>
+
+    <h1 class="page-title">
+      <i class="fas fa-tasks"></i> Мои задачи
+    </h1>
+
+    <div class="filters-section">
+      <div class="view-toggle">
+        <button id="assignedTasksBtn" class="btn btn-primary btn-active" onclick="showTaskType('assignedTasks', 'assignedTasksBtn', 'createdTasksBtn')">
+          <i class="fas fa-user-check"></i> Назначенные мне
+        </button>
+        <button id="createdTasksBtn" class="btn btn-secondary" onclick="showTaskType('createdTasks', 'createdTasksBtn', 'assignedTasksBtn')">
+          <i class="fas fa-plus-circle"></i> Созданные мной
+        </button>
+      </div>
+
+      <div class="view-toggle">
+        <button id="singleColumnBtn" class="btn btn-secondary btn-active" onclick="setLayout('single-column')">
+          <i class="fas fa-grip-lines"></i>
+        </button>
+        <button id="grid2x2Btn" class="btn btn-secondary" onclick="setLayout('grid-2x2')">
+          <i class="fas fa-grip-vertical"></i>
+        </button>
+        <button id="grid3x3Btn" class="btn btn-secondary" onclick="setLayout('grid-3x3')">
+          <i class="fas fa-grip-horizontal"></i>
+        </button>
+      </div>
+
+      <div class="sort-group">
+        <label for="sort">Сортировка:</label>
+        <select id="sort" onchange="sortTasks()">
+          <option value="name">По названию</option>
+          <option value="date">По дате</option>
+          <option value="status">По статусу</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Назначенные задачи -->
+    <div id="assignedTasks" class="task-type-content">
+      <h3 class="section-title">
+        <i class="fas fa-user-check"></i>Назначенные мне задачи
+      </h3>
+
+      <ul class="task-list">
+        <li th:each="task : ${assignedTasks}" th:data-task-id="${task.id}" class="task-card">
+          <div class="task-header">
+            <h3 class="task-title" th:text="${task.title}">Название задачи</h3>
+            <i class="fas fa-star star-icon" onclick="toggleStar(this)"></i>
+          </div>
+
+          <div class="task-status" th:classappend="${'status-' + task.status}">
+            <span th:text="${task.status}"></span>
+          </div>
+
+          <div class="task-meta">
+            <p><strong>Проект:</strong> <span th:text="${task.project.name}"></span></p>
+            <p><strong>Создатель:</strong> <span th:text="${task.creator.username}"></span></p>
+            <p><strong>Дата создания:</strong>
+              <span class="created-date" th:text="${#temporals.format(task.createdAt, 'dd.MM.yyyy')}"></span>
+            </p>
+            <p><strong>Дата окончания:</strong>
+              <span class="end-date" th:text="${#temporals.format(task.endDate, 'yyyy-MM-dd')}" style="display: none;"></span>
+              <span class="end-date-display" th:text="${#temporals.format(task.endDate, 'dd.MM.yyyy')}"></span>
+            </p>
+          </div>
+
+          <div class="days-left">
+            <strong>До конца:</strong>
+            <span class="days-until-end"></span>
+          </div>
+
+          <div class="task-actions">
+            <button class="task-btn details-btn" onclick="openTaskModal(this)">
+              <i class="fas fa-info-circle"></i> Подробнее
+            </button>
+            <a th:href="@{/projects/{projectId}/tasks/{taskId}(taskId=${task.id}, projectId=${task.project.id})}"
+               class="task-btn view-btn">
+              <i class="fas fa-external-link-alt"></i> К задаче
+            </a>
+          </div>
+
+          <div class="description" style="display: none;" th:text="${task.description}"></div>
+        </li>
+      </ul>
+
+      <div th:if="${assignedTasks.empty}" class="empty-state">
+        <i class="fas fa-tasks"></i>
+        <p>Нет назначенных вам задач</p>
+      </div>
+    </div>
+
+    <!-- Созданные задачи -->
+    <div id="createdTasks" class="task-type-content" style="display: none;">
+      <h3 class="section-title">
+        <i class="fas fa-plus-circle"></i>Созданные мной задачи
+      </h3>
+
+      <ul class="task-list">
+        <li th:each="task : ${createdTasks}" th:data-task-id="${task.id}" class="task-card">
+          <div class="task-header">
+            <h3 class="task-title" th:text="${task.title}">Название задачи</h3>
+            <i class="fas fa-star star-icon" onclick="toggleStar(this)"></i>
+          </div>
+
+          <div class="task-status" th:classappend="${'status-' + task.status}">
+            <span th:text="${task.status}"></span>
+          </div>
+
+          <div class="task-meta">
+            <p><strong>Проект:</strong> <span th:text="${task.project.name}"></span></p>
+            <p><strong>Исполнитель:</strong> <span th:text="${task.assignee.username}"></span></p>
+            <p><strong>Дата создания:</strong>
+              <span class="created-date" th:text="${#temporals.format(task.createdAt, 'dd.MM.yyyy')}"></span>
+            </p>
+            <p><strong>Дата окончания:</strong>
+              <span class="end-date" th:text="${#temporals.format(task.endDate, 'yyyy-MM-dd')}" style="display: none;"></span>
+              <span class="end-date-display" th:text="${#temporals.format(task.endDate, 'dd.MM.yyyy')}"></span>
+            </p>
+          </div>
+
+          <div class="days-left">
+            <strong>До конца:</strong>
+            <span class="days-until-end"></span>
+          </div>
+
+          <div class="task-actions">
+            <button class="task-btn details-btn" onclick="openTaskModal(this)">
+              <i class="fas fa-info-circle"></i> Подробнее
+            </button>
+            <a th:href="@{/projects/{projectId}/tasks/{taskId}(taskId=${task.id}, projectId=${task.project.id})}"
+               class="task-btn view-btn">
+              <i class="fas fa-external-link-alt"></i> К задаче
+            </a>
+          </div>
+
+          <div class="description" style="display: none;" th:text="${task.description}"></div>
+        </li>
+      </ul>
+
+      <div th:if="${createdTasks.empty}" class="empty-state">
+        <i class="fas fa-tasks"></i>
+        <p>Вы не создавали задач</p>
+      </div>
+    </div>
+
+  </div>
+  <div id="taskModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 class="modal-title" id="modalTaskTitle" style="display: none;"></h2>
+      <div class="modal-body" id="modalTaskDetails"></div>
+    </div>
+  </div>
+
+  <!-- Кнопка "Наверх" -->
+  <div class="scroll-to-top" onclick="scrollToTop()">
+    <i class="fa fa-angle-double-up"></i>
+  </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/star.js}"></script>
+
+<script>
+  // Функция для переключения между типами задач
+  function showTaskType(sectionId, activeBtnId, inactiveBtnId) {
+    document.querySelectorAll('.task-type-content').forEach(section => {
+      section.style.display = 'none';
+    });
+
+    document.getElementById(sectionId).style.display = 'block';
+
+    document.getElementById(activeBtnId).classList.remove('btn-secondary');
+    document.getElementById(activeBtnId).classList.add('btn-primary', 'btn-active');
+
+    document.getElementById(inactiveBtnId).classList.remove('btn-primary', 'btn-active');
+    document.getElementById(inactiveBtnId).classList.add('btn-secondary');
+
+    restoreStarState();
+  }
+
+  // Функция для изменения макета
+  function setLayout(layout) {
+    const taskLists = document.querySelectorAll(".task-list");
+    const singleColumnBtn = document.getElementById("singleColumnBtn");
+    const grid2x2Btn = document.getElementById("grid2x2Btn");
+    const grid3x3Btn = document.getElementById("grid3x3Btn");
+
+    // Убираем активный класс со всех кнопок
+    [singleColumnBtn, grid2x2Btn, grid3x3Btn].forEach(btn => {
+      btn.classList.remove('btn-active');
+    });
+
+    // Добавляем активный класс к выбранной кнопке
+    if (layout === "single-column") {
+      singleColumnBtn.classList.add('btn-active');
+      taskLists.forEach(taskList => {
+        taskList.classList.remove("grid-2x2", "grid-3x3");
+      });
+    } else if (layout === "grid-2x2") {
+      grid2x2Btn.classList.add('btn-active');
+      taskLists.forEach(taskList => {
+        taskList.classList.remove("grid-3x3");
+        taskList.classList.add("grid-2x2");
+      });
+    } else if (layout === "grid-3x3") {
+      grid3x3Btn.classList.add('btn-active');
+      taskLists.forEach(taskList => {
+        taskList.classList.remove("grid-2x2");
+        taskList.classList.add("grid-3x3");
+      });
+    }
+
+    restoreStarState();
+  }
+
+  // Расчет дней до окончания задачи
+  function calculateDaysUntilEnd() {
+    document.querySelectorAll('.end-date').forEach(endDateElement => {
+      const endDateStr = endDateElement.textContent;
+      const endDate = new Date(endDateStr);
+      const now = new Date();
+
+      // Разница в миллисекундах
+      const timeDiff = endDate - now;
+
+      // Разница в днях
+      const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+      const daysUntilEndElement = endDateElement.closest('.task-card').querySelector('.days-until-end');
+
+      const daysContainer = endDateElement.closest('.task-card').querySelector('.days-left');
+
+      if (daysDiff < 3) {
+        daysContainer.classList.add('danger');
+        daysContainer.classList.remove('warning');
+      } else if (daysDiff < 7) {
+        daysContainer.classList.add('warning');
+        daysContainer.classList.remove('danger');
+      } else {
+        daysContainer.classList.remove('warning', 'danger');
+      }
+
+      if (daysDiff > 0) {
+        daysUntilEndElement.textContent = `${daysDiff} ${getDayWord(daysDiff)}`;
+      } else if (daysDiff === 0) {
+        daysUntilEndElement.textContent = "Сегодня";
+      } else {
+        daysUntilEndElement.textContent = "Срок истек";
+      }
+    });
+  }
+
+  function getDayWord(days) {
+    const lastDigit = days % 10;
+    const lastTwoDigits = days % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+      return "дней";
+    }
+    if (lastDigit === 1) {
+      return "день";
+    }
+    if (lastDigit >= 2 && lastDigit <= 4) {
+      return "дня";
+    }
+    return "дней";
+  }
+
+  // Модальное окно
+  function openTaskModal(button) {
+    const taskCard = button.closest('.task-card');
+    const taskId = taskCard.getAttribute('data-task-id');
+
+    // Получаем данные задачи
+    const taskTitle = taskCard.querySelector('.task-title').textContent;
+    const projectName = taskCard.querySelector('.task-meta p:nth-of-type(1) span').textContent;
+    const status = taskCard.querySelector('.task-status').textContent;
+    const creator = taskCard.querySelector('.task-meta p:nth-of-type(2) span')?.textContent || "Вы";
+    const assignee = taskCard.querySelector('.task-meta p:nth-of-type(3) span')?.textContent || "Не назначен";
+    const createdAt = taskCard.querySelector('.created-date').textContent;
+    const endDate = taskCard.querySelector('.end-date-display').textContent;
+    const daysLeft = taskCard.querySelector('.days-until-end').textContent;
+    const description = taskCard.querySelector('.description').textContent || "Описание отсутствует";
+
+    // Получаем состояние звезды из карточки задачи
+    const cardStar = taskCard.querySelector('.star-icon');
+    const isStarred = cardStar ? cardStar.classList.contains('active') :
+            localStorage.getItem(`task_${taskId}_starred`) === 'true';
+
+    // Формируем HTML для модального окна
+    const modalContent = `
+            <div class="modal-header">
+                <h2 class="modal-title">${taskTitle}</h2>
+                <i class="fas fa-star modal-star-icon ${isStarred ? 'active' : ''}"
+                   onclick="toggleModalStar(this, '${taskId}')"></i>
+            </div>
+            <div class="modal-row">
+                <strong>Проект:</strong> ${projectName}
+            </div>
+            <div class="modal-row">
+                <strong>Статус:</strong> <span class="task-status ${taskCard.querySelector('.task-status').className.split(' ')[1]}">${status}</span>
+            </div>
+            <div class="modal-row">
+                <strong>Создатель:</strong> ${creator}
+            </div>
+            <div class="modal-row">
+                <strong>Исполнитель:</strong> ${assignee}
+            </div>
+            <div class="modal-row">
+                <strong>Дата создания:</strong> ${createdAt}
+            </div>
+            <div class="modal-row">
+                <strong>Дата окончания:</strong> ${endDate}
+            </div>
+            <div class="modal-row">
+                <strong>До окончания:</strong> ${daysLeft}
+            </div>
+            <div class="modal-description">
+                <strong>Описание:</strong><br>
+                ${description}
+            </div>
+        `;
+
+    // Заполняем модальное окно
+    document.getElementById("modalTaskDetails").innerHTML = modalContent;
+
+    // Показываем модальное окно
+    document.getElementById("taskModal").style.display = "block";
+    document.body.style.overflow = "hidden"; // Запрещаем прокрутку страницы
+  }
+
+  function closeTaskModal() {
+    document.getElementById("taskModal").style.display = "none";
+    document.body.style.overflow = "auto"; // Запрещаем прокрутку страницы
+  }
+
+  // Закрытие модального окна
+  document.querySelector(".close").addEventListener("click", closeTaskModal);
+  window.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("taskModal")) {
+      closeTaskModal();
+    }
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeTaskModal();
+    }
+  });
+
+  // Переключение звездочки в модальном окне
+  function toggleModalStar(starElement, taskId) {
+    starElement.classList.toggle('active');
+    const isStarred = starElement.classList.contains('active');
+    localStorage.setItem(`task_${taskId}_starred`, isStarred);
+
+    // Обновляем звезду в карточке задачи
+    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+    if (taskCard) {
+      const cardStar = taskCard.querySelector('.star-icon');
+      if (cardStar) {
+        cardStar.classList.toggle('active', isStarred);
+      }
+    }
+  }
+
+  // Инициализация при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    calculateDaysUntilEnd();
+    restoreStarState();
+    showTaskType('assignedTasks', 'assignedTasksBtn', 'createdTasksBtn');
+  });
+</script>
+</body>
+</html>

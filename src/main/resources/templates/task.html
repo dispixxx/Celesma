@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${task.title} + ' | TaskFlow'">Задача | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #3a56cc;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --purple: #a64ca6;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --white-hover: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .container {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .btn-back-my-tasks, .btn-back-project-tasks{
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+        .btn-back-my-tasks:hover, .btn-back-project-tasks:hover{
+            background-color: var(--light-gray);
+        }
+
+        .btn-back:hover {
+            background-color: var(--light-gray);
+        }
+
+        .project-name {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .task-title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 600;
+            font-size: 24px;
+            color: var(--primary);
+            margin: 0;
+            max-width: 800px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .star-icon {
+            cursor: pointer;
+            color: #ccc;
+            font-size: 24px;
+            transition: var(--transition);
+        }
+
+        .star-icon.active {
+            color: #ffcc00;
+        }
+
+        .task-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-card {
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status-container {
+            position: relative;
+        }
+
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-block;
+        }
+
+        .status-NEW { background-color: var(--gray); }
+        .status-IN_PROGRESS { background-color: var(--info); }
+        .status-REVIEW { background-color: var(--purple); }
+        .status-COMPLETED { background-color: var(--secondary); }
+        .status-ON_HOLD { background-color: var(--warning); }
+        .status-CANCELED { background-color: var(--danger); }
+
+        .status-dropdown {
+            position: absolute;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 10;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .status-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .status-option {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            margin: 4px;
+        }
+
+        .status-option:hover {
+            background: var(--light-gray);
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.2);
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+        }
+
+        .comment-list, .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .comment, .history-item {
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+        }
+
+        .comment-header, .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-author, .history-user {
+            font-weight: 600;
+        }
+
+        .comment-date, .history-date {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+
+        .comment-text, .history-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .char-counter {
+            font-size: 14px;
+            color: var(--gray);
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-history {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 10px;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .sort-btn {
+            background: var(--light-gray);
+            color: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .sort-btn.active, .sort-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .task-title {
+                font-size: 20px;
+            }
+
+            .task-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Стили для приоритета */
+        .priority {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .priority-LOW {
+            background-color: #e6f7e6;
+            color: #2e7d32;
+        }
+
+        .priority-MEDIUM {
+            background-color: #fff8e1;
+            color: #ff8f00;
+        }
+
+        .priority-HIGH {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        /* Стили для счётчика времени */
+        .time-remaining {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .time-remaining.normal {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .time-remaining.warning {
+            background-color: #fff8e1;
+            color: #ff8f00;
+        }
+
+        .time-remaining.danger {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <div class="page-header">
+            <!--<div class="back-actions">
+                <a th:href="@{/my-tasks}" class="btn-back-my-tasks">
+                    <i class=""></i> Мои задачи
+                </a>
+                <a th:href="@{/projects/{projectId}/tasks(projectId=${task.project.id})}" class="btn-back-project-tasks">
+                    <i class=""></i> Задачи проекта
+                </a>
+            </div>-->
+            <button type="button" class="btn-back" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="project-name" th:text="${task.project.name}"></div>
+        </div>
+
+        <div class="task-header">
+            <h1 class="task-title" th:text="${task.title}"></h1>
+            <i class="fas fa-star star-icon" onclick="toggleStar(this)" th:classappend="${isFavorite} ? 'active'"
+               th:data-task-id="${task.id}"></i>
+        </div>
+
+        <div class="task-details">
+            <div class="detail-card">
+                <div class="detail-label">Статус</div>
+                <div class="status-container" th:classappend="${ not(isAdminOrModerator or isCreatorOrAssignee)} ? 'disabled'">
+                    <div th:classappend="${'status-' + task.status}" class="status"
+                         th:onclick="${isAdminOrModerator or isCreatorOrAssignee} ? 'showStatusOptions(this)' : ''"
+                         th:data-task-id="${task.id}" th:data-project-id="${projectId}">
+                        <span th:text="${task.status}"></span>
+                    </div>
+                    <div class="status-dropdown">
+                        <div th:each="status : ${taskStatus}"
+                             th:classappend="${'status-' + status} + ' status-option'"
+                             th:data-status="${status}"
+                             th:text="${status} + (${task.status == status} ? ' ✓' : '')"
+                             th:onclick="${isAdminOrModerator or isCreatorOrAssignee} ? 'changeStatus(this)' : ''"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Проект</div>
+                <div class="detail-value" th:text="${task.project.name}"></div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Создатель</div>
+                <div class="detail-value" th:text="${task.creator.username}"></div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Исполнитель</div>
+                <div class="detail-value" th:text="${task.assignee.username}"></div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Дата создания</div>
+                <div class="detail-value" th:text="${#temporals.format(task.createdAt, 'dd.MM.yyyy')}"></div>
+            </div>
+
+            <div class="detail-card"
+                 th:attr="
+                 data-start-date=${#temporals.format(task.createdAt, 'yyyy-MM-dd')},
+                 data-end-date=${#temporals.format(task.endDate, 'yyyy-MM-dd')}">
+                <div class="detail-label">Срок выполнения</div>
+                <div class="detail-value">
+                    <span class="days-difference" th:if="${task.createdAt != null and task.endDate != null}">
+                        <span class="days-count"></span> <span class="days-word"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Приоритет</div>
+                <div class="priority" th:classappend="'priority-' + ${task.priority}" th:text="${task.priority}">
+                    <i th:classappend="{
+                        'priority-LOW': 'fas fa-arrow-down',
+                        'priority-MEDIUM': 'fas fa-equals',
+                        'priority-HIGH': 'fas fa-arrow-up'
+                    }[${'priority-' + task.priority}]"></i>
+                    <span th:text="${task.priority}"></span>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Дата окончания</div>
+                <div class="detail-value">
+                    <span th:text="${#temporals.format(task.endDate, 'dd.MM.yyyy')}"></span>
+                    <div class="time-remaining"
+                         th:attr="data-end-date=${#temporals.format(task.endDate, 'yyyy-MM-dd')}"
+                         id="timeRemaining">
+                        <i class="fas fa-clock"></i>
+                        <span class="days-text">Вычисление...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-comments"></i> Комментарии
+                </h3>
+
+                <div class="comment-form">
+                    <form id="commentForm" th:action="@{/projects/{projectId}/tasks/{id}/comments(id=${task.id},projectId=${projectId})}" method="post">
+        <textarea name="commentText" id="commentText" placeholder="Напишите комментарий..." required maxlength="500"
+                  oninput="updateCharCount(this)"></textarea>
+                        <div class="char-counter"><span class="char-count">0 / 500</span></div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i> Отправить
+                        </button>
+                    </form>
+                </div>
+
+                <div class="comment-list">
+                    <div th:each="comment : ${task.comments}" class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author" th:text="${comment.author.username}"></span>
+                            <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                        </div>
+                        <div class="comment-text" th:text="${comment.text}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-history"></i> История изменений
+                    <button class="toggle-history" onclick="toggleHistory()">Свернуть</button>
+                </h3>
+
+                <div class="sort-buttons">
+                    <button class="sort-btn" onclick="sortHistory('desc')" id="sort-desc">Сначала новые</button>
+                    <button class="sort-btn" onclick="sortHistory('asc')" id="sort-asc">Сначала старые</button>
+                </div>
+
+                <div class="history-list" id="history-content">
+                    <div th:each="history : ${taskHistory}" class="history-item" th:attr="data-timestamp=${#temporals.format(history.timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                        <div class="history-header">
+                            <span class="history-user" th:text="${history.user.username}"></span>
+                            <span class="history-date" th:text="${#temporals.format(history.timestamp, 'dd.MM.yyyy HH:mm')}"></span>
+                        </div>
+                        <div class="history-text" th:text="${history.description}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/star-in-task.js}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentUser = {
+        id: /*[[${user.id}]]*/ 0,
+        username: /*[[${user.username}]]*/ '',
+        firstName: /*[[${user.firstName}]]*/ '',
+        lastName: /*[[${user.lastName}]]*/ ''
+        // добавьте другие нужные свойства
+    };
+    /*]]>*/
+</script>
+
+<script>
+    // Функция для отображения выпадающего списка статусов
+    function showStatusOptions(element) {
+        const dropdown = element.parentElement.querySelector('.status-dropdown');
+        document.querySelectorAll('.status-dropdown').forEach(d => {
+            if (d !== dropdown) d.classList.remove('show');
+        });
+        dropdown.classList.toggle('show');
+    }
+
+    // Функция для изменения статуса
+    function changeStatus(element) {
+        const container = element.closest('.status-container');
+        const statusElement = container.querySelector('.status');
+        const taskId = statusElement.getAttribute('data-task-id');
+        const projectId = statusElement.getAttribute('data-project-id');
+        const newStatus = element.getAttribute('data-status');
+        const oldStatus = statusElement.textContent.trim();
+
+        // Создаем запись в истории на клиенте
+        addHistoryRecord({
+                user: {
+                    id: currentUser.id,
+                    username: currentUser.username,
+                    fullName: currentUser.firstName + ' ' + currentUser.lastName
+                },
+            timestamp: new Date().toISOString(),
+            description: `Статус изменен с ${oldStatus} на ${newStatus}`
+        });
+
+        fetch(`/projects/${projectId}/tasks/${taskId}/status?status=${newStatus}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // Обновляем статус
+                statusElement.textContent = newStatus;
+                statusElement.className = 'status';
+                statusElement.classList.add(`status-${newStatus}`);
+                container.querySelector('.status-dropdown').classList.remove('show');
+                location.reload()
+            } else if (response.status === 403) {
+                alert('У вас нет прав для изменения статуса задачи');
+            } else {
+                alert('Ошибка при изменении статуса');
+            }
+        }).catch(error => {
+            console.error('Ошибка:', error);
+        });
+    }
+
+    // Функция для добавления записи в историю
+    function addHistoryRecord(historyItem) {
+        const historyContent = document.getElementById('history-content');
+        const historyItemElement = document.createElement('div');
+        historyItemElement.className = 'history-item';
+        historyItemElement.setAttribute('data-timestamp', historyItem.timestamp);
+
+        const formattedDate = new Date(historyItem.timestamp).toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+
+        historyItemElement.innerHTML = `
+            <div class="history-header">
+                <span class="history-user">${historyItem.user.username}</span>
+                <span class="history-date">${formattedDate}</span>
+            </div>
+            <div class="history-text">${historyItem.description}</div>
+        `;
+
+        // Добавляем новую запись в начало списка
+        historyContent.insertBefore(historyItemElement, historyContent.firstChild);
+
+        // Обновляем сортировку, если активна сортировка по новым
+        const activeSortBtn = document.querySelector('.sort-btn.active');
+        if (activeSortBtn && activeSortBtn.id === 'sort-desc') {
+            sortHistory('desc');
+        }
+    }
+
+    // Закрытие выпадающего списка при клике вне его
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.status-container')) {
+            document.querySelectorAll('.status-dropdown').forEach(d => {
+                d.classList.remove('show');
+            });
+        }
+    });
+
+    function updateCharCount(textarea) {
+        const charCount = textarea.parentElement.querySelector('.char-count');
+        charCount.textContent = `${textarea.value.length} / 500`;
+        charCount.style.color = textarea.value.length > 450 ? 'var(--danger)' : 'var(--gray)';
+    }
+
+    // Обработка комментариев
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const textarea = document.querySelector('textarea[name="commentText"]');
+        if (textarea) {
+            updateCharCount(textarea);
+        }
+
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitComment();
+            });
+        }
+
+        // Инициализация сортировки истории
+        sortHistory('desc');
+
+        // Обновление времени выполнения
+        updateTime();
+    });
+
+    async function submitComment() {
+        const commentText = document.getElementById('commentText').value.trim();
+        if (!commentText) return;
+
+        try {
+            const form = document.getElementById('commentForm');
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+
+            if (!response.ok) throw new Error('Ошибка сервера');
+
+            const newComment = {
+                author: {username: currentUser.username},
+                text: commentText,
+                createdAt: new Date().toISOString()
+            };
+
+            addCommentToUI(newComment);
+            document.getElementById('commentText').value = '';
+            updateCharCount(document.getElementById('commentText'));
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось отправить комментарий');
+        }
+    }
+
+    function addCommentToUI(comment) {
+        const commentList = document.querySelector('.comment-list');
+        const commentElement = document.createElement('div');
+        commentElement.className = 'comment';
+
+        const formattedDate = new Date(comment.createdAt).toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+
+        commentElement.innerHTML = `
+        <div class="comment-header">
+            <span class="comment-author">${comment.author.username}</span>
+            <span class="comment-date">${formattedDate}</span>
+        </div>
+        <div class="comment-text">${comment.text}</div>
+    `;
+
+        commentList.prepend(commentElement); // Добавляем в начало списка
+    }
+
+    // Переключение видимости истории
+    function toggleHistory() {
+        const historyContent = document.getElementById('history-content');
+        const toggleBtn = document.querySelector('.toggle-history');
+
+        if (historyContent.style.display === 'none') {
+            historyContent.style.display = 'block';
+            toggleBtn.textContent = 'Свернуть';
+        } else {
+            historyContent.style.display = 'none';
+            toggleBtn.textContent = 'Развернуть';
+        }
+    }
+
+    // Функция для сортировки истории на клиенте
+    function sortHistory(order) {
+        const historyContent = document.getElementById('history-content');
+        const items = Array.from(historyContent.querySelectorAll('.history-item'));
+
+        // Сортируем элементы по дате
+        items.sort((a, b) => {
+            const dateA = new Date(a.getAttribute('data-timestamp'));
+            const dateB = new Date(b.getAttribute('data-timestamp'));
+            return order === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // Очищаем контейнер
+        while (historyContent.firstChild) {
+            historyContent.removeChild(historyContent.firstChild);
+        }
+
+        // Добавляем отсортированные элементы обратно
+        items.forEach(item => {
+            historyContent.appendChild(item);
+        });
+
+        // Обновляем активную кнопку сортировки
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`sort-${order}`).classList.add('active');
+    }
+
+    function getDayWord(days) {
+        days = Math.abs(days);
+        const lastDigit = days % 10;
+        const lastTwoDigits = days % 100;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+            return "дней";
+        }
+        if (lastDigit === 1) {
+            return "день";
+        }
+        if (lastDigit >= 2 && lastDigit <= 4) {
+            return "дня";
+        }
+        return "дней";
+    }
+
+    function updateTime() {
+        const elements = document.querySelectorAll('.time-remaining');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        elements.forEach(el => {
+            const endDateStr = el.getAttribute('data-end-date');
+            const endDate = new Date(endDateStr);
+            endDate.setHours(0, 0, 0, 0);
+
+            const diffDays = calculateDaysBetween(endDate, today);
+            const daysText = el.querySelector('.days-text');
+
+            // Обновляем классы для цвета
+            el.className = 'time-remaining';
+            if (diffDays < 0) {
+                el.classList.add('danger');
+            } else if (diffDays < 3) {
+                el.classList.add('warning');
+            } else {
+                el.classList.add('normal');
+            }
+
+            // Обновляем текст
+            if (diffDays > 0) {
+                daysText.innerHTML = `Осталось <span>${diffDays}</span> ${getDayWord(diffDays)}`;
+            } else if (diffDays === 0) {
+                daysText.innerHTML = `Заканчивается сегодня`;
+            } else {
+                daysText.innerHTML = `Просрочено на <span>${-diffDays}</span> ${getDayWord(diffDays)}`;
+            }
+        });
+
+        const startDateElements = document.querySelectorAll('[data-start-date]');
+        startDateElements.forEach(el => {
+            const startDateStr = el.getAttribute('data-start-date');
+            const endDateStr = el.getAttribute('data-end-date');
+
+            if (startDateStr && endDateStr) {
+                const startDate = new Date(startDateStr);
+                const endDate = new Date(endDateStr);
+                const diffDays = calculateDaysBetween(endDate, startDate);
+
+                const daysDiffElement = el.querySelector('.days-difference span');
+                if (daysDiffElement) {
+                    daysDiffElement.textContent = diffDays;
+
+                    // Обновляем слово "день/дня/дней"
+                    const dayWordElement = daysDiffElement.nextElementSibling;
+                    if (dayWordElement) {
+                        dayWordElement.textContent = getDayWord(diffDays);
+                    }
+                }
+            }
+        });
+    }
+
+    // Функция для вычисления разницы в днях между датами
+    function calculateDaysBetween(date1, date2) {
+        const oneDay = 24 * 60 * 60 * 1000; // часов * минуты * секунды * миллисекунды
+        return Math.round((date1 - date2) / oneDay);
+    }
+</script>
+
+</body>
+</html>

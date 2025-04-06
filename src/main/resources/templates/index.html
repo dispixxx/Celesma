@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>celesma - Управление проектами</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        /* Основные стили */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* Минимальная высота равна высоте экрана */
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            color: #333;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("/image/teamwork.jpg");
+            opacity: 0.1;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .content-wrapper {
+            flex: 1; /* Занимает всё доступное пространство */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            /*padding: 65px 20px; !* Увеличенный отступ *!*/
+        }
+
+        .header h1 {
+            font-size: 110px; /* Увеличенный размер шрифта */
+            color: #3366ff;
+            font-family: "Orbitron", sans-serif;
+            font-weight: 700;
+            margin-bottom: 15px; /* Увеличенный отступ */
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease forwards 0.5s;
+        }
+
+        .header p {
+            font-size: 28px; /* Увеличенный размер шрифта */
+            max-width: 780px; /* Увеличенная ширина */
+            margin: 0 auto;
+            color: #555;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease forwards 1s;
+        }
+
+        .button-container {
+            margin-top: 30px; /* Увеличенный отступ */
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* Увеличенный отступ */
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease forwards 1.5s; /* Задержка для кнопок */
+        }
+
+        .button {
+            font-size: 23px; /* Увеличенный размер шрифта */
+            padding: 15px 35px; /* Увеличенный отступ */
+            border: none;
+            border-radius: 10px; /* Увеличенный радиус */
+            cursor: pointer;
+            background-color: #3366ff;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #254eda;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 50px; /* Увеличенный отступ */
+            margin: 80px auto; /* Увеличенный отступ */
+            max-width: 1300px; /* Увеличенная ширина */
+            text-align: center;
+        }
+
+        .feature-box {
+            width: 360px; /* Увеличенная ширина */
+            padding: 30px; /* Увеличенный отступ */
+            background: white;
+            border-radius: 20px; /* Увеличенный радиус */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Увеличенная тень */
+            transition: transform 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInDown 1s ease forwards 2s;
+        }
+
+        .feature-box:nth-child(1) {
+            animation-delay: 2s;
+        }
+
+        .feature-box:nth-child(2) {
+            animation-delay: 2s;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-box h3 {
+            color: #3366ff;
+            font-size: 26px; /* Увеличенный размер шрифта */
+            margin-bottom: 15px; /* Увеличенный отступ */
+        }
+
+        .feature-box p {
+            font-size: 20px; /* Увеличенный размер шрифта */
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px; /* Увеличенный отступ */
+            background-color: #3366ff;
+            color: white;
+            font-size: 20px; /* Увеличенный размер шрифта */
+            opacity: 0;
+            animation: fadeIn 2s ease forwards 3s;
+        }
+
+        /* Анимации */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Класс для отключения анимаций */
+        .skip-animations * {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Обёртка для контента -->
+<div class="content-wrapper">
+    <!-- Заголовок -->
+    <div class="header">
+        <h1>Celesma</h1>
+        <p>Современный инструмент для управления проектами и задачами. Работайте эффективнее вместе!</p>
+        <div class="button-container">
+            <a href="/register" class="button">Регистрация</a>
+            <a href="/dashboard" class="button">Авторизация</a><!--Если не авторизован, то кинет на /login, иначе на /dashboard-->
+        </div>
+    </div>
+
+    <!-- Преимущества -->
+    <div class="features">
+        <div class="feature-box">
+            <h3>Гибкое управление задачами</h3>
+            <p>Создавайте, назначайте и контролируйте задачи легко и удобно.</p>
+        </div>
+        <div class="feature-box">
+            <h3>Совместная работа</h3>
+            <p>Работайте с командой в реальном времени, оставляйте комментарии и следите за прогрессом.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Подвал -->
+<footer>
+    &copy; 2025 celesma.
+</footer>
+
+<script>
+    // Обработчик клика для пропуска анимаций
+    document.addEventListener('click', () => {
+        // Добавляем класс, который отключает анимации
+        document.body.classList.add('skip-animations');
+    });
+</script>
+
+</body>
+</html>

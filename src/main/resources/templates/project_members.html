@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление участниками | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #3a56cc;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --purple: #a64ca6;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --white-hover: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .main-content {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            flex: 1;
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .page-title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 600;
+            font-size: 22px;
+            color: var(--primary);
+            margin: 15px 0 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .project-name {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 0;
+            transition: var(--transition);
+            order: -1;
+        }
+
+        .btn-back:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Стили для карточек участников */
+        .members-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .members-list {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .member-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border: 1px solid var(--light-gray);
+        }
+
+        .member-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
+        }
+
+        .member-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .member-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .member-role {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-change-role {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-change-role:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-remove {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-remove:hover {
+            background-color: #dc3545;
+        }
+
+        .btn-back-project {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background-color: var(--light-gray);
+            color: var(--primary);
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 30px;
+            transition: var(--transition);
+        }
+
+        .btn-back-project:hover {
+            background-color: var(--white-hover);
+            color: var(--primary-dark);
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .modal-btn-confirm {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #dc3545;
+        }
+
+        .modal-btn-cancel {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* Выпадающий список для ролей */
+        .dropdown {
+            position: absolute;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 15px;
+            z-index: 1001;
+            display: none;
+            min-width: 200px;
+        }
+
+        .dropdown select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--light-gray);
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .dropdown-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <div class="page-header">
+            <button type="button" class="btn-back" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="project-name" th:text="${project.name}"></div>
+        </div>
+
+        <h1 class="page-title">
+            <i class="fas fa-users-cog"></i> Управление участниками
+        </h1>
+
+        <h3 class="section-title">
+            <i class="fas fa-user-friends"></i> Список участников
+        </h3>
+
+        <div class="members-list">
+            <div th:each="member : ${projectMembers}" class="member-card"
+                 th:data-member-id="${member.id}"
+                 th:data-project-id="${project.id}">
+                <div class="member-info">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-details">
+                        <div class="member-name" th:text="${member.user.username}">Имя пользователя</div>
+                        <div class="member-role" th:text="${member.role}">Роль</div>
+                    </div>
+                </div>
+                <div class="member-actions">
+                    <button class="btn-action btn-change-role">
+                        <i class="fas fa-user-edit"></i> Роль
+                    </button>
+                    <button class="btn-action btn-remove">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center" style="text-align: center">
+            <a th:href="@{/projects/{id}(id=${project.id})}" class="btn-back-project">
+                <i class="fas fa-arrow-left"></i> Назад к проекту
+            </a>
+        </div>
+
+        <!-- Модальное окно подтверждения удаления -->
+        <div id="confirmDeleteModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Подтверждение
+                </h3>
+                <p>Вы действительно хотите удалить этого участника из проекта?</p>
+                <div class="modal-actions">
+                    <button id="confirmDeleteBtn" class="modal-btn modal-btn-confirm">Удалить</button>
+                    <button id="cancelDeleteBtn" class="modal-btn modal-btn-cancel">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Выпадающий список для изменения роли -->
+        <div id="changeRoleDropdown" class="dropdown">
+            <select id="roleSelect">
+                <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+            </select>
+            <div class="dropdown-actions">
+                <button id="cancelRoleChangeBtn" class="modal-btn modal-btn-cancel">Отмена</button>
+                <button id="confirmRoleChangeBtn" class="modal-btn modal-btn-confirm">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Элементы для удаления участника
+        const deleteButtons = document.querySelectorAll(".btn-remove");
+        const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+        // Элементы для изменения роли
+        const changeRoleButtons = document.querySelectorAll(".btn-change-role");
+        const changeRoleDropdown = document.getElementById("changeRoleDropdown");
+        const confirmRoleChangeBtn = document.getElementById("confirmRoleChangeBtn");
+        const cancelRoleChangeBtn = document.getElementById("cancelRoleChangeBtn");
+        const roleSelect = document.getElementById("roleSelect");
+
+        let currentMemberCard = null;
+
+        // Обработчики для удаления участника
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                currentMemberCard = button.closest(".member-card");
+
+                document.querySelectorAll('.member-card.selected').forEach(card => card.classList.remove('selected'));
+                currentMemberCard.classList.add('selected');
+                confirmDeleteModal.style.display = "flex";
+            });
+
+        });
+
+        confirmDeleteBtn.addEventListener("click", function () {
+            const memberId = currentMemberCard.getAttribute("data-member-id");
+            const projectId = currentMemberCard.getAttribute("data-project-id");
+
+            fetch(`/projects/${projectId}/manage/members/${memberId}/remove`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        currentMemberCard.remove();
+                    } else {
+                        response.json().then(data => {
+                            alert(data.message || "Ошибка при удалении пользователя");
+                            location.reload();
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка:", error);
+                    alert("Произошла ошибка при удалении участника");
+                });
+
+            if (currentMemberCard) {
+                currentMemberCard.classList.remove('selected');
+            }
+
+            confirmDeleteModal.style.display = "none";
+        });
+
+        cancelDeleteBtn.addEventListener("click", function () {
+            confirmDeleteModal.style.display = "none";
+
+            if (currentMemberCard) {
+                currentMemberCard.classList.remove('selected');
+            }
+        });
+
+        // Обработчики для изменения роли
+        changeRoleButtons.forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.stopPropagation();
+                currentMemberCard = button.closest(".member-card");
+                const currentRole = currentMemberCard.querySelector(".member-role").textContent;
+                roleSelect.value = currentRole;
+
+                // Скрываем все открытые dropdown перед показом нового
+                document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+
+                currentMemberCard.classList.add('selected');
+
+                changeRoleDropdown.style.display = "block";
+
+                const cardRect = currentMemberCard.getBoundingClientRect();
+                const dropdownRect = changeRoleDropdown.getBoundingClientRect();
+
+                // Расчитываем позицию dropdown, чтобы он появился прямо над карточкой
+                const top = cardRect.top + window.scrollY + 20 ; // 10px отступ сверху для визуального разделения
+                const left = cardRect.left + window.scrollX - dropdownRect.width;
+
+                changeRoleDropdown.style.top = `${top}px`;
+                changeRoleDropdown.style.left = `${left}px`;
+            });
+        });
+
+        confirmRoleChangeBtn.addEventListener("click", function () {
+            const selectedRole = roleSelect.value;
+            const memberId = currentMemberCard.getAttribute("data-member-id");
+            const projectId = currentMemberCard.getAttribute("data-project-id");
+
+            fetch(`/projects/${projectId}/manage/members/${memberId}/change-role`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ role: selectedRole })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        currentMemberCard.querySelector(".member-role").textContent = selectedRole;
+                    } else {
+                        response.json().then(data => {
+                            alert(data.message || "Ошибка при изменении роли");
+                            location.reload();
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка:", error);
+                    alert("Произошла ошибка при изменении роли");
+                });
+
+            changeRoleDropdown.style.display = "none";
+
+            if (currentMemberCard) {
+                currentMemberCard.classList.remove('selected');
+            }
+        });
+
+        cancelRoleChangeBtn.addEventListener("click", function () {
+            changeRoleDropdown.style.display = "none";
+
+            if (currentMemberCard) {
+                currentMemberCard.classList.remove('selected');
+            }
+        });
+
+        // Закрытие dropdown при клике вне его
+        document.addEventListener("click", function(e) {
+            const isDropdownClick = changeRoleDropdown.contains(e.target);
+            const isRoleButtonClick = e.target.closest('.btn-change-role');
+            const isDeleteButtonClick = e.target.closest('.btn-remove');
+            const isModalClick = confirmDeleteModal.contains(e.target);
+
+            if (!isDropdownClick && !isRoleButtonClick && !isDeleteButtonClick) {
+                changeRoleDropdown.style.display = "none";
+
+                // Снимаем выделение с текущей карточки
+                if (currentMemberCard) {
+                    currentMemberCard.classList.remove('selected');
+                }
+            }
+
+            if (!isModalClick && !isDeleteButtonClick || (e.target === document.getElementById("confirmDeleteModal"))) {
+                confirmDeleteModal.style.display = "none";
+
+                // Снимаем выделение с текущей карточки
+                if (currentMemberCard) {
+                    currentMemberCard.classList.remove('selected');
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

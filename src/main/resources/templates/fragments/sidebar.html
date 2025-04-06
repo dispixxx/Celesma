@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+</head>
+<body>
+#<!-- Определение фрагмента -->
+<div th:fragment="sidebar" class="sidebar">
+    <h2>
+        <span>celesma</span>
+        <i class="fas fa-chevron-left toggle-icon"></i>
+    </h2>
+    <ul>
+        <li><a href="/dashboard"><i class="fas fa-folder-open"></i> <span>Проекты</span></a></li>
+        <li><a href="/my-tasks"><i class="fas fa-tasks"></i> <span>Задачи</span></a></li>
+        <li><a href="#"><i class="fas fa-cog"></i> <span>Настройки</span></a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> <span>Выйти</span></a></li>
+    </ul>
+    <div class="user-container">
+        <span class="user-name" sec:authentication="name"></span>
+        <a href="/user/profile" class="user-icon">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+</div>
+#<!-- Определение фрагмента -->
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Редактирование проекта | TaskFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+  <style>
+    :root {
+      --primary: #3366ff;
+      --primary-dark: #3a56cc;
+      --secondary: #6fbf73;
+      --danger: #ff6666;
+      --warning: #ffb84d;
+      --info: #6c8cff;
+      --purple: #a64ca6;
+      --gray: #a0a0a0;
+      --light-gray: #f5f7fa;
+      --dark-gray: #6c757d;
+      --white: #ffffff;
+      --white-hover: #e9ecef;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(to right, #eef2ff, #cfd9ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+
+    .container {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title {
+      font-family: "Orbitron", sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      color: var(--primary);
+      margin: 1rem 0;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .project-name {
+      font-size: 14px;
+      color: var(--dark-gray);
+      background: var(--light-gray);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+    }
+
+    .btn-back:hover {
+      background-color: var(--light-gray);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--dark-gray);
+      font-size: 14px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--light-gray);
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.2);
+    }
+
+    .form-control::placeholder {
+      color: var(--gray);
+      opacity: 1;
+    }
+
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .char-count {
+      font-size: 0.8rem;
+      color: var(--gray);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-delete {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--danger);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-delete:hover {
+      background-color: #e05555;
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+
+      .page-title {
+        font-size: 20px;
+      }
+    }
+
+    #description, #name {
+      box-sizing: border-box;
+    }
+
+    /* Анимации для toast-уведомлений */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(20px); }
+    }
+  </style>
+</head>
+<body>
+
+<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+
+<div class="main-content">
+  <div class="container">
+    <div class="page-header">
+      <button type="button" class="btn-back" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i> Назад
+      </button>
+      <div class="project-name" th:text="${project.name}"></div>
+    </div>
+
+    <h1 class="page-title">
+      <i class="fas fa-edit"></i> Редактирование проекта
+    </h1>
+
+    <form action="#" th:action="@{/projects/{projectId}/edit(projectId=${project.id})}" th:object="${project}" method="post">
+      <div class="form-group">
+        <label for="name" class="form-label">Название проекта</label>
+        <input type="text" th:field="*{name}" id="name" class="form-control"
+               placeholder="Введите название проекта" required>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="form-label">Описание проекта</label>
+        <textarea th:field="*{description}" id="description" class="form-control"
+                  maxlength="500" oninput="updateCharCount()"
+                  placeholder="Опишите ваш проект" required></textarea>
+        <div id="charCount" class="char-count" th:text="${#strings.length(project.description)} + ' / 500'"></div>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i class="fas fa-save"></i> Сохранить изменения
+      </button>
+
+      <button type="button" class="btn-delete" onclick="confirmDelete()">
+        <i class="fas fa-trash-alt"></i> Удалить проект
+      </button>
+    </form>
+  </div>
+</div>
+</body>
+
+<script>
+  function updateCharCount() {
+    const textarea = document.getElementById("description");
+    const charCount = document.getElementById("charCount");
+    charCount.textContent = `${textarea.value.length} / 500`;
+  }
+
+  // Функция для показа toast-уведомлений
+  function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '4px';
+    toast.style.color = 'white';
+    toast.style.fontWeight = '500';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.zIndex = '1000';
+    toast.style.animation = 'fadeIn 0.3s ease-out';
+
+    if (type === 'success') {
+      toast.style.backgroundColor = '#28a745'; // Зеленый для успеха
+    } else {
+      toast.style.backgroundColor = '#dc3545'; // Красный для ошибки
+    }
+
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.3s ease-out';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  async function deleteProject() {
+    try {
+      const projectId = [[${project.id}]];
+      const response = await fetch(`/projects/${projectId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        showToast('Проект успешно удален', 'success');
+        setTimeout(() => {
+          window.location.href = '/dashboard'; // Перенаправление после удаления
+        }, 1500);
+      } else {
+        const error = await response.json();
+        showToast(error.message || 'Ошибка при удалении проекта', 'error');
+      }
+    } catch (error) {
+      showToast('Произошла ошибка при удалении проекта', 'error');
+      console.error('Ошибка:', error);
+    }
+  }
+
+  function confirmDelete() {
+    if (confirm('Вы уверены, что хотите удалить этот проект? Это действие нельзя отменить.')) {
+      deleteProject();
+    }
+  }
+
+  // Инициализация счетчика символов при загрузке
+  document.addEventListener('DOMContentLoaded', function() {
+    updateCharCount();
+  });
+</script>
+
+<script th:src="@{/js/sidebar.js}"></script>
+</html>

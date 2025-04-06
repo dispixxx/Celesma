@@ -1,0 +1,169 @@
+/*SIDEBAR*/
+.sidebar {
+    width: 250px;
+    background-color: #2C2F33;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: sticky;
+    top: 0; /* Прилипает к верхнему краю */
+    left: 0; /* Прилипает к левому краю */
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out, 0.3s ease-in-out;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+    padding: 20px 20px 20px 20px;
+}
+
+.sidebar h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 9px;
+    font-family: "Orbitron", serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out, 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    >span{
+        width: 100%;
+    }
+}
+
+.sidebar.collapsed h2 {
+    transform: translateX(-9px);
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out, 0.3s ease-in-out;
+}
+
+.sidebar.collapsed ul {
+    transform: translateX(-9px);
+}
+
+.sidebar ul li {
+    position: relative;
+    margin: 30px 0;
+    display: flex;
+    align-items: center;
+    min-height:30px; /*Чтобы иконки не прыгали при сворачивании*/
+}
+
+.sidebar ul li a {
+    position: relative;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    /*width: auto; !* Убираем растяжение *!*/
+    padding: 5px 10px; /* Добавляем немного отступов для удобного клика */
+    border-radius: 5px; /* Скругление при наведении */
+    width: 100%; /*Заполнить всю область сайдбара*/
+
+}
+
+.sidebar ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Эффект при наведении */
+    padding: 5px 10px;
+}
+
+.sidebar.collapsed ul li a:hover{
+    padding: 5px 5px 5px 10px;
+}
+
+.sidebar span {
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out, 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    display: inline-block;
+    min-height: 20px; /* Устанавливаем высоту, чтобы текст не исчезал полностью */
+    white-space: nowrap;
+    visibility: visible;
+}
+.sidebar.collapsed span {
+    /*left: 5px;*/
+    opacity: 0;
+    width: 0;
+    visibility: hidden;
+}
+.sidebar.collapsed span::after {
+    content: "";
+    display: none;
+}
+
+.user-container {
+    padding-left: 9px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    transition: left 0.3s;
+}
+
+.sidebar.collapsed .user-container {
+    left: -2px;
+}
+
+.user-name {
+    width: 130px;
+    max-width: 130px; /* Ограничивает ширину */
+    white-space: nowrap; /* Запрещает перенос текста */
+    overflow: hidden; /* Обрезает текст.Убирает анимацию на свертывании((ПЕЧАЛЬ БЕДА(( */
+    text-overflow: ellipsis; /* Добавляет "..." */
+    display: inline-block;
+    padding-left: 5px;
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.user-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #8A8D91;
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out, 0.3s ease-in-out;
+}
+
+.sidebar.collapsed .user-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+}
+
+.user-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Эффект при наведении */
+}
+
+.toggle-icon {
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: transform 0.5s ease-in-out;
+    border-radius: 5px;
+}
+
+.toggle-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Эффект при наведении */
+}
+
+.sidebar.collapsed .toggle-icon {
+    transform: scale(-1, 1) translateX(9px);
+}
+/*SIDEBAR*/
