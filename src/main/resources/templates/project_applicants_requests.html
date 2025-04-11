@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление заявками | TaskFlow</title>
@@ -356,7 +358,7 @@
 </head>
 <body>
 
-<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+<div th:insert="~{fragments/sidebar :: sidebar(username=${#authentication.name})}"></div>
 
 <div class="main-content">
     <div class="container">
@@ -524,6 +526,8 @@
         function processApplication(action) {
             if (!currentApplicantCard) return;
 
+            const csrfToken = document.querySelector("meta[name='_csrf']").content;
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
             const projectId = currentApplicantCard.getAttribute("data-project-id");
             const userId = currentApplicantCard.getAttribute("data-user-id");
             const endpoint = action === 'approve' ? 'approve' : 'reject';
@@ -532,6 +536,7 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    [csrfHeader]:csrfToken
                 }
             })
                 .then(response => {

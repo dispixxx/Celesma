@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
 <head>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <meta charset="UTF-8">
   <title>Просмотр проекта | TaskFlow</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -90,6 +92,7 @@
       border-radius: var(--border-radius);
       margin-bottom: 30px;
       line-height: 1.6;
+      text-align: justify;
     }
 
     .project-description p {
@@ -130,10 +133,27 @@
     }
 
     .member-item {
+      position: relative; /* Для правильного позиционирования псевдоэлементов */
+    }
+
+    .member-link {
       display: flex;
       align-items: center;
+      width: 100%;
+      text-decoration: none;
+      color: inherit;
       padding: 12px 0;
-      border-bottom: 1px solid #eee;
+    }
+
+    .member-link:hover {
+      background-color: rgba(51, 102, 255, 0.05);
+      border-radius: var(--border-radius);
+    }
+
+    /* Убираем стандартное подчеркивание и меняем курсор */
+    .member-name, .member-role {
+      text-decoration: none;
+      cursor: pointer;
     }
 
     .member-item:last-child {
@@ -372,15 +392,15 @@
     }
 
     /* Тултипы */
+    /* Улучшенные стили для тултипов */
     [data-tooltip] {
       position: relative;
-      cursor: pointer;
     }
 
-    [data-tooltip]::after {
+    [data-tooltip]::before {
       content: attr(data-tooltip);
       position: absolute;
-      bottom: 100%;
+      bottom: 50%;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0, 0, 0, 0.85);
@@ -395,28 +415,24 @@
       pointer-events: none;
       z-index: 100;
       min-width: 120px;
-      max-width: 250px;
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    [data-tooltip]:hover::after {
+    [data-tooltip]:hover::before {
       opacity: 1;
       visibility: visible;
-      bottom: calc(100% + 8px);
+      bottom: calc(33%);
     }
 
-    /* Для многострочных тултипов */
-    [data-tooltip].multiline::after {
-      white-space: normal;
-      width: max-content;
-      max-width: 300px;
+    .member-avatar[data-tooltip]::before {
+      left: 18px; /* Центрируем для аватара */
     }
   </style>
 </head>
 <body>
 
-<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+<div th:insert="~{fragments/sidebar :: sidebar(username=${#authentication.name})}"></div>
 
 <div class="main-content">
   <div class="project-card">
@@ -535,14 +551,18 @@
 
     <ul class="members-list">
       <li class="member-item" th:each="member : ${members}">
-        <div class="member-avatar" th:text="${#strings.substring(member.user.username, 0, 1).toUpperCase()}"></div>
-        <span class="member-name" th:text="${member.user.username}"></span>
-        <span class="member-role"
-              th:classappend="${member.role eq projectRoles[0]} ? 'role-admin' :
-                     (${member.role eq projectRoles[1]} ? 'role-moderator' : 'role-member')"
-              th:text="${member.role eq projectRoles[0]} ? 'Админ' :
-               (${member.role eq projectRoles[1]} ? 'Модератор' : 'Участник')">
-</span>
+        <a th:href="@{/user/profile/{username}(username=${member.user.username})}"
+           class="member-link"
+           th:attr="data-tooltip=${member.user.firstName + ' ' + member.user.lastName}">
+          <div class="member-avatar" th:text="${#strings.substring(member.user.username, 0, 1).toUpperCase()}"></div>
+          <span class="member-name" th:text="${member.user.username}"></span>
+          <span class="member-role"
+                th:classappend="${member.role eq projectRoles[0]} ? 'role-admin' :
+                   (${member.role eq projectRoles[1]} ? 'role-moderator' : 'role-member')"
+                th:text="${member.role eq projectRoles[0]} ? 'Админ' :
+             (${member.role eq projectRoles[1]} ? 'Модератор' : 'Участник')">
+      </span>
+        </a>
       </li>
     </ul>
   </div>
@@ -552,6 +572,8 @@
 
 <script>
   document.getElementById('joinRequestButton')?.addEventListener('click', function() {
+    const csrfToken = document.querySelector("meta[name='_csrf']").content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
     const projectId = [[${project.id}]];
     const userId = [[${currentUser.id}]];
 
@@ -559,6 +581,7 @@
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        [csrfHeader]: csrfToken
       },
       body: JSON.stringify({ projectId: projectId })
     })

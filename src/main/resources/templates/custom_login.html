@@ -115,7 +115,8 @@
     Please try again.
   </div>
 
-  <form action="/login" method="post">
+  <form th:action="@{/login}" method="post">
+<!--    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>-->
 <!--    <label for="username">Username:</label>-->
     <input type="text" id="username" name="username" placeholder="Логин" required>
 <!--    <label for="password">Password:</label>-->

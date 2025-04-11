@@ -49,11 +49,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public void updateUserProfile(UserProfileDto userProfileDto) {
         String username = authenticationFacade.getAuthenticatedUsername();
-        Optional<User> user = userRepository.findByUsername(username);
-        // Обновляем данные пользователя
-        user.get().setFirstName(userProfileDto.getFirstName().isEmpty() ? null : userProfileDto.getFirstName());
-        user.get().setLastName(userProfileDto.getLastName().isEmpty() ? null : userProfileDto.getLastName());
-        userRepository.save(user.get());
+        User user = getUserByUsername(username);
+        if (user.getUsername().equals(userProfileDto.getUsername())) {
+            // Обновляем данные пользователя
+            user.setFirstName(userProfileDto.getFirstName().isEmpty() ? null : userProfileDto.getFirstName());
+            user.setLastName(userProfileDto.getLastName().isEmpty() ? null : userProfileDto.getLastName());
+            userRepository.save(user);
+        }
     }
 
     public User getUserByUsername(String username) {

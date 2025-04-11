@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - celesma</title>
@@ -115,7 +117,7 @@
         <span th:text="${success}"></span>
     </div>
 
-    <form action="/register/user" method="post">
+    <form th:action="@{/register/user}" method="post">
         <input type="text" id="username" name="username" placeholder="Никнейм" required>
         <input type="email" id="email" name="email" placeholder="Email" required>
         <input type="password" id="password" name="password" placeholder="Пароль" required>

@@ -174,7 +174,7 @@ public class ProjectController {
         if (!isMember) {
             return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
         }
-
+        model.addAttribute("username", username);
         model.addAttribute("project", project);
         model.addAttribute("tasks", projectTasks);
         model.addAttribute("isMember", isMember);

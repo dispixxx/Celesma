@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
 <head>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <meta charset="UTF-8">
   <title>Мои задачи | TaskFlow</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -509,7 +511,7 @@
 </head>
 <body>
 
-<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+<div th:insert="~{fragments/sidebar :: sidebar(username=${username})}"></div>
 
 <div class="main-content">
   <div class="container">

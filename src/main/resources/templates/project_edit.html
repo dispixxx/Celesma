@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
 <head>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Редактирование проекта | TaskFlow</title>
@@ -235,7 +237,7 @@
 </head>
 <body>
 
-<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+<div th:insert="~{fragments/sidebar :: sidebar(username=${#authentication.name})}"></div>
 
 <div class="main-content">
   <div class="container">
@@ -315,11 +317,14 @@
 
   async function deleteProject() {
     try {
+      const csrfToken = document.querySelector("meta[name='_csrf']").content;
+      const csrfHeader = document.querySelector("meta[name='_csrf_header']").content
       const projectId = [[${project.id}]];
       const response = await fetch(`/projects/${projectId}/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          [csrfHeader]: csrfToken
         }
       });
 

@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta charset="UTF-8">
     <title>Профиль пользователя | TaskFlow</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -462,7 +465,7 @@
 </head>
 <body>
 
-<div th:insert="~{fragments/sidebar :: sidebar}"></div>
+<div th:insert="~{fragments/sidebar :: sidebar(username=${#authentication.name})}"></div>
 
 <div id="imageEditor">
     <div id="editorHeader">
@@ -479,8 +482,10 @@
 <div class="main-content">
     <div class="profile-card">
         <div class="profile-header">
-            <h1 class="profile-title">Мой профиль</h1>
-            <i class="fas fa-cog settings-icon" onclick="toggleEditMode()"></i>
+            <h1 class="profile-title" th:text="${isOwner} ? 'Мой профиль' : 'Профиль пользователя'"></h1>
+            <i th:if="${isOwner}"
+               class="fas fa-cog settings-icon"
+               onclick="toggleEditMode()"></i>
         </div>
 
         <div class="user-profile">
@@ -495,7 +500,7 @@
             <div class="user-details">
                 <h1 class="username">
                     <span class="username-prefix">@</span>
-                    <span th:text="${username}"></span>
+                    <span id="username" th:text="${username}"></span>
                 </h1>
 
                 <div class="name-fields">
@@ -677,7 +682,10 @@
 
     // Save changes
     function saveChanges() {
+        const csrfToken = document.querySelector("meta[name='_csrf']").content;
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
         const userData = {
+            username: document.getElementById("username").innerText,
             firstName: document.getElementById("edit-firstname").innerText,
             lastName: document.getElementById("edit-lastname").innerText,
             avatar: document.getElementById("userAvatar").src
@@ -685,7 +693,10 @@
 
         fetch('/api/user/updateProfile', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
             body: JSON.stringify(userData)
         })
             .then(response => {

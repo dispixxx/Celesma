@@ -1,10 +1,19 @@
 package com.disp.celesmaproject.model;
 
 public class UserProfileDto {
+    private String username;
     private String firstName;
     private String lastName;
 
     // Геттеры и сеттеры
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getFirstName() {
         return firstName; }
 

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns="">
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
 </head>
 <body>
 #<!-- Определение фрагмента -->
-<div th:fragment="sidebar" class="sidebar">
+<div th:fragment="sidebar(username)" class="sidebar">
     <h2>
         <span>celesma</span>
         <i class="fas fa-chevron-left toggle-icon"></i>
@@ -14,15 +16,33 @@
         <li><a href="/dashboard"><i class="fas fa-folder-open"></i> <span>Проекты</span></a></li>
         <li><a href="/my-tasks"><i class="fas fa-tasks"></i> <span>Задачи</span></a></li>
         <li><a href="#"><i class="fas fa-cog"></i> <span>Настройки</span></a></li>
-        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> <span>Выйти</span></a></li>
+        <li>
+            <a href="#" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> <span>Выйти</span>
+            </a>
+        </li>
     </ul>
     <div class="user-container">
         <span class="user-name" sec:authentication="name"></span>
-        <a href="/user/profile" class="user-icon">
+        <a th:href="@{/user/profile/{un}(un=${username})}"  class="user-icon">
             <i class="fas fa-user"></i>
         </a>
     </div>
 </div>
 #<!-- Определение фрагмента -->
 </body>
+<script>
+    function logout() {
+        fetch("/logout", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector("meta[name='_csrf']").content,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ "_csrf": document.querySelector("meta[name='_csrf']").content })
+        })
+            .then(() => window.location.href = "/") // Перенаправление после выхода
+            .catch(err => console.error("Ошибка выхода:", err));
+    }
+</script>
 </html>
