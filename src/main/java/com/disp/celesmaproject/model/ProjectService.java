@@ -178,7 +178,7 @@ public class ProjectService {
     }
 
     //Перенесен из ProjectController. Конвертер типа: ProjectMember -> User
-    public List<User> getConvertedProjectMembersToUser(List<ProjectMember> members) {
+    public List<User> getConvertedProjectMembersToUsers(List<ProjectMember> members) {
         return members.stream().map(ProjectMember::getUser).toList();
     }
 

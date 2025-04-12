@@ -84,6 +84,10 @@ public class TaskService {
 
     }
 
+    public List<Task> getTasksByUserIdAndStatus(Long userId, TaskStatus status) {
+        return taskRepository.findByAssigneeIdAndStatus(userId,status);
+    }
+
     public void changeTaskStatus(Long taskId, TaskStatus newStatus) {
         String username = authenticationFacade.getAuthenticatedUsername();
         User user = userDetailsService.getUserByUsername(username);

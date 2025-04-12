@@ -467,6 +467,7 @@
                 currentMemberCard = button.closest(".member-card");
 
                 document.querySelectorAll('.member-card.selected').forEach(card => card.classList.remove('selected'));
+                document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
                 currentMemberCard.classList.add('selected');
                 confirmDeleteModal.style.display = "flex";
             });
@@ -478,6 +479,7 @@
             const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
             const memberId = currentMemberCard.getAttribute("data-member-id");
             const projectId = currentMemberCard.getAttribute("data-project-id");
+
 
             fetch(`/projects/${projectId}/manage/members/${memberId}/remove`, {
                 method: "POST",
@@ -526,6 +528,9 @@
 
                 // Скрываем все открытые dropdown перед показом нового
                 document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+
+                // Удаляем класс selected со всех карточек перед добавлением к текущей
+                document.querySelectorAll('.member-card').forEach(card => card.classList.remove('selected'));
 
                 currentMemberCard.classList.add('selected');
 

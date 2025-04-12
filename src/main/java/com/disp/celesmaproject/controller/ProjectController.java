@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class ProjectController {
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember> members = projectService.getSortedProjectMembers(project.getId());
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUser(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
         List<Task> tasks = taskService.getTasksByProjectId(projectId);
         Long totalsTasks = (long) tasks.size();
         Long completedTasks = (long) tasks.stream().filter(task->task.getStatus().equals(TaskStatus.COMPLETED)).count();
@@ -126,7 +127,7 @@ public class ProjectController {
         User currentUser = userDetailsService.getUserByUsername(username);
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUser(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
         // Проверяем, является ли пользователь участником проекта
         boolean isMember = projectService.isMember(projectUsers, currentUser);
         // Проверяем, является ли пользователь администратором или модератором
@@ -169,7 +170,7 @@ public class ProjectController {
         Project project = projectService.getProjectById(projectId);
         List<Task> projectTasks = taskService.getTasksByProjectId(projectId);
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUser(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
         boolean isMember = projectService.isMember(projectUsers, currentUser);
         if (!isMember) {
             return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
@@ -196,7 +197,7 @@ public class ProjectController {
         User currentUser = userDetailsService.getUserByUsername(username);
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUser(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
         // Проверяем, является ли пользователь участником проекта
         boolean isMember = projectService.isMember(projectUsers, currentUser);
         // Проверяем, является ли пользователь администратором или модератором
@@ -217,13 +218,59 @@ public class ProjectController {
 
     }
 
+    @GetMapping("/{projectId}/manage/stats")
+    public String getProjectStats(@PathVariable Long projectId, Model model) {
+        String username = authenticationFacade.getAuthenticatedUsername();
+        User currentUser = userDetailsService.getUserByUsername(username);
+        Project project = projectService.getProjectById(projectId);
+        List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
+
+
+        Map<Long, Map<String, Integer>> userTaskCounts = new HashMap<>();
+        Map<Long, Integer> userTotalTasks = new HashMap<>();
+
+        boolean isMember = projectUsers.contains(currentUser);
+        // Проверяем, является ли пользователь администратором или модератором
+        boolean isAdminOrModerator = false;
+        if (isMember) {
+            ProjectRole role = project.getMemberRole(currentUser);
+            isAdminOrModerator = role == ProjectRole.ADMIN || role == ProjectRole.MODERATOR;
+        }
+
+        // Проверяем, является ли пользователь администратором или модератором
+        if (!isAdminOrModerator) {
+            return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
+        }
+
+        for (ProjectMember member : projectMembers) {
+            Map<String, Integer> statusCounts = new HashMap<>();
+            int totalTasks = 0;
+            for (TaskStatus status : TaskStatus.values()) {
+                int count = taskService.getTasksByUserIdAndStatus(member.getUser().getId(), status).size();
+                statusCounts.put(status.toString(), count);
+                totalTasks += count;
+            }
+            userTaskCounts.put(member.getUser().getId(), statusCounts);
+            userTotalTasks.put(member.getUser().getId(), totalTasks);
+        }
+
+        model.addAttribute("project", project);
+        model.addAttribute("userTaskCounts", userTaskCounts);
+        model.addAttribute("userTotalTasks", userTotalTasks);
+        model.addAttribute("projectMembers", projectMembers);
+        model.addAttribute("roles", ProjectRole.values());
+
+        return "project_stats";
+    }
+
     @GetMapping("/{projectId}/manage/members")
     public String manageProjectMembers(@PathVariable Long projectId, Model model){
         String username = authenticationFacade.getAuthenticatedUsername();
         User currentUser = userDetailsService.getUserByUsername(username);
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUser(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
         boolean isMember = projectUsers.contains(currentUser);
         // Проверяем, является ли пользователь администратором или модератором
         boolean isAdminOrModerator = false;

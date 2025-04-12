@@ -123,7 +123,7 @@
     }
 
     .members-title i {
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .members-list {
@@ -514,7 +514,7 @@
             <span class="stat-value" th:text="${newTasks}">0</span>
           </div>
           <div class="stat-item">
-            <span class="stat-color" style="background-color: var(--info);"></span>
+            <span class="stat-color" style="background-color: var(--primary);"></span>
             <span class="stat-label">В процессе</span>
             <span class="stat-value" th:text="${inProgressTasks}">0</span>
           </div>
@@ -655,8 +655,8 @@
       const gradient = `conic-gradient(
         var(--gray) 0%,
         var(--gray) ${newPercentage}%,
-        var(--info) ${newPercentage}%,
-        var(--info) ${newPercentage + inProgressPercentage}%,
+        var(--primary) ${newPercentage}%,
+        var(--primary) ${newPercentage + inProgressPercentage}%,
         var(--purple) ${newPercentage + inProgressPercentage}%,
         var(--purple) ${newPercentage + inProgressPercentage + reviewPercentage}%,
         var(--secondary) ${newPercentage + inProgressPercentage + reviewPercentage}%,

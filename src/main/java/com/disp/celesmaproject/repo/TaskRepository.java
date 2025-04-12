@@ -19,4 +19,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     int countByCreatorId(Long creatorId);
     @Query("SELECT COUNT(DISTINCT t.id) FROM Task t WHERE (t.assignee.id = :userId OR t.creator.id = :userId) AND t.status = 'COMPLETED'")
     int countCompletedTasksByUser(@Param("userId") Long userId, TaskStatus status);
+
+    List<Task> findByAssigneeIdAndStatus(Long userId, TaskStatus status);
 }

@@ -249,7 +249,7 @@
                 <span>Управление участниками</span>
             </a>
 
-            <a href="#" class="management-button">
+            <a th:href="@{/projects/{projectId}/manage/stats(projectId=${project.id})}" class="management-button">
                 <i class="fas fa-chart-line"></i>
                 <span>Статистика проекта</span>
             </a>
