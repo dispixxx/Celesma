@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,9 @@ public class ProjectService {
 
     @Autowired
     private ProjectMemberRepository projectMemberRepository;
+
+    @Autowired
+    private TaskService taskService;
 
     // Сохранение проекта с установкой роли создателя как "ADMIN"
     public void saveProject(Project project) {
@@ -103,6 +107,29 @@ public class ProjectService {
             throw new IllegalStateException("User can't remove myself");
         }
         project.deleteMember(projectMember);
+        List<Task> assigneeTasks = taskService.getTasksByAssigneeId(projectMember.getUser().getId());
+        assigneeTasks.forEach(task -> {
+            TaskHistory history = new TaskHistory();
+            history.setTask(task);
+            history.setUser(currentUser);
+            history.setDescription("Статус изменен с " + task.getStatus() + " на " + TaskStatus.ON_HOLD + " Пользователь: " + task.getAssignee().getUsername() +
+                    " больше не учавствует в проекте");
+            history.setTimestamp(LocalDateTime.now());
+            task.getHistory().add(history);
+            task.setStatus(TaskStatus.ON_HOLD);
+        });
+        List<Task> creatorTasks = taskService.getTasksByCreatorId(projectMember.getUser().getId());
+        creatorTasks.forEach(task -> {
+            TaskHistory history = new TaskHistory();
+            history.setTask(task);
+            history.setUser(currentUser);
+            history.setDescription("Статус изменен с " + task.getStatus() + " на " + TaskStatus.ON_HOLD + " Пользователь: " + task.getCreator().getUsername() +
+                    " больше не учавствует в проекте");
+            history.setTimestamp(LocalDateTime.now());
+            task.getHistory().add(history);
+            task.setStatus(TaskStatus.ON_HOLD);
+        });
+
         projectRepository.save(project);
 
     }

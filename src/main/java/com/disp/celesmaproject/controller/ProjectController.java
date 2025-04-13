@@ -74,8 +74,7 @@ public class ProjectController {
         User currentUser = userDetailsService.getUserByUsername(username);
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember> members = projectService.getSortedProjectMembers(project.getId());
-        List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
-        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(members);
         List<Task> tasks = taskService.getTasksByProjectId(projectId);
         Long totalsTasks = (long) tasks.size();
         Long completedTasks = (long) tasks.stream().filter(task->task.getStatus().equals(TaskStatus.COMPLETED)).count();
