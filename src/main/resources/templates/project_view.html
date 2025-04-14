@@ -705,6 +705,8 @@
   /*]]>*/
 </script>
 
+<!--Chat-->
+
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
@@ -760,7 +762,6 @@
           sender: currentUser,
           // senderName: `${user.firstName} ${user.lastName}`,
           content: content,
-          timestamp: new Date().toISOString()
         };
 
         stompClient.send(`/app/project-chat/${projectId}`, {}, JSON.stringify(chatMessage));

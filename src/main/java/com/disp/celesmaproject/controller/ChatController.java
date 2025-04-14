@@ -1,6 +1,7 @@
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.*;
+import com.disp.celesmaproject.util.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -28,6 +29,7 @@ public class ChatController {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+
     @MessageMapping("/project-chat/{projectId}")
     @SendTo("/topic/project-chat/{projectId}")
     public ChatMessage handleChatMessage(
@@ -37,7 +39,9 @@ public class ChatController {
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember> members = projectService.getSortedProjectMembers(project.getId());
         List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(members);
-        boolean isMember = projectUsers.contains(userDetailsService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName()));
+        String username = principal.getName();
+        User currentUser = userDetailsService.getUserByUsername(username);
+        boolean isMember = projectUsers.contains(currentUser);
         if (!isMember) {
             throw new AccessDeniedException("Not a project member");
         }
