@@ -1,6 +1,6 @@
 package com.disp.celesmaproject.model;
 
-public class UserProfileDto {
+public class UserProfileDTO {
     private String username;
     private String firstName;
     private String lastName;

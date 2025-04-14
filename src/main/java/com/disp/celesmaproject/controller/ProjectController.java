@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/projects")
@@ -85,7 +86,7 @@ public class ProjectController {
         long canceledTasks = (long) tasks.stream().filter(task -> task.getStatus().equals(TaskStatus.CANCELED)).count();
 
         // Проверяем, является ли пользователь участником проекта
-        boolean isMember = projectUsers.contains(currentUser);
+        boolean isMember = projectService.isMember(projectUsers, currentUser);
         // Проверяем, является ли пользователь администратором или модератором
         boolean isAdminOrModerator = false;
         boolean isAdmin = false;
@@ -141,6 +142,7 @@ public class ProjectController {
             return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
         }
         model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         return "project_edit";
     }
 
@@ -211,6 +213,7 @@ public class ProjectController {
             return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
         }
         model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         model.addAttribute("countOfApplicants",project.getApplicants().size());
 
         return "project_management";
@@ -229,7 +232,7 @@ public class ProjectController {
         Map<Long, Map<String, Integer>> userTaskCounts = new HashMap<>();
         Map<Long, Integer> userTotalTasks = new HashMap<>();
 
-        boolean isMember = projectUsers.contains(currentUser);
+        boolean isMember = projectService.isMember(projectUsers, currentUser);
         // Проверяем, является ли пользователь администратором или модератором
         boolean isAdminOrModerator = false;
         if (isMember) {
@@ -255,6 +258,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         model.addAttribute("userTaskCounts", userTaskCounts);
         model.addAttribute("userTotalTasks", userTotalTasks);
         model.addAttribute("projectMembers", projectMembers);
@@ -270,7 +274,7 @@ public class ProjectController {
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
         List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
-        boolean isMember = projectUsers.contains(currentUser);
+        boolean isMember = projectService.isMember(projectUsers, currentUser);
         // Проверяем, является ли пользователь администратором или модератором
         boolean isAdminOrModerator = false;
         if (isMember) {
@@ -284,6 +288,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         model.addAttribute("projectMembers", projectMembers);
         model.addAttribute("roles", ProjectRole.values());
         return "project_members";
@@ -349,6 +354,7 @@ public class ProjectController {
         List<User> applicants = project.getApplicants().stream().toList();
         model.addAttribute("applicants", applicants);
         model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
 
         return "project_applicants_requests"; // Имя шаблона для страницы управления
     }

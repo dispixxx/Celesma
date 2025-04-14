@@ -46,11 +46,19 @@ public class TaskController {
         List<Task> createdTasksInProject =taskService.getTasksByCreatorIdAndProject(currentUser.getId(), projectId); // Задачи, где пользователь создатель
         List<Task> assignedTasksInProject =taskService.getTasksByAssigneeIdAndProjectId(currentUser.getId(), projectId); // Задачи, где пользователь исполнитель
 
+        List<User> projectUsers = project.getMembers().stream()
+                .map(ProjectMember::getUser)
+                .toList();
+
+        boolean isMember = projectUsers.contains(currentUser);
+
         model.addAttribute("createdTasks", createdTasksInProject);
         model.addAttribute("assignedTasks", assignedTasksInProject);
         model.addAttribute("allTasks", projectTasks);
         model.addAttribute("projectName", project.getName());
         model.addAttribute("projectId", project.getId());
+        model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
 
         return "project_tasks";
     }
@@ -88,6 +96,8 @@ public class TaskController {
         model.addAttribute("taskHistory", history);
         model.addAttribute("sortOrder", sortOrder);
         model.addAttribute("user", currentUser);
+        model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         return "task";
     }
 
@@ -104,10 +114,15 @@ public class TaskController {
         Project project = projectService.getProjectById(projectId);
         String username = authenticationFacade.getAuthenticatedUsername();
         User currentUser = userDetailsService.getUserByUsername(username);
+        List<ProjectMember>  projectMembers = projectService.getSortedProjectMembers(project.getId());
+        List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(projectMembers);
+        boolean isMember = projectService.isMember(projectUsers, currentUser);
 //        User currentUser = userRepository.findByUsername(username).isPresent() ? userRepository.findByUsername(username).get() : null;
         model.addAttribute("members", project.getMembers());
         model.addAttribute("projectName", project.getName());
         model.addAttribute("creatorId", Objects.requireNonNull(currentUser).getId());
+        model.addAttribute("project", project);
+        model.addAttribute("isMember", isMember);
         return "task_create";
     }
 

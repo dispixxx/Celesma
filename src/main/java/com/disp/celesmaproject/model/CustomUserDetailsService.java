@@ -47,7 +47,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    public void updateUserProfile(UserProfileDto userProfileDto) {
+    public void updateUserProfile(UserProfileDTO userProfileDto) {
         String username = authenticationFacade.getAuthenticatedUsername();
         User user = getUserByUsername(username);
         if (user.getUsername().equals(userProfileDto.getUsername())) {

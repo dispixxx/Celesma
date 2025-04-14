@@ -11,8 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Objects;
-
 @Controller
 public class UserController {
 
@@ -98,7 +96,7 @@ public class UserController {
     }
 
     @PostMapping("/api/user/updateProfile")
-    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDto userProfileDto) {
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO userProfileDto) {
         userDetailsService.updateUserProfile(userProfileDto);
         return ResponseEntity.ok().build();
     }

@@ -1,6 +1,6 @@
 package com.disp.celesmaproject.model;
 
-public class ProjectDto {
+public class ProjectDTO {
     private String name;
     private String description;
 

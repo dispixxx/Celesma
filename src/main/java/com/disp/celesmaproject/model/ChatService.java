@@ -12,8 +12,8 @@ public class ChatService {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
-    public void saveMessage(ChatMessage message) {
-        chatMessageRepository.save(message);
+    public ChatMessage saveMessage(ChatMessage message) {
+        return chatMessageRepository.save(message);
     }
 
     public List<ChatMessage> getMessagesByProject(Long projectId) {
