@@ -1,0 +1,18 @@
+<div th:fragment="chat" class="chat">
+  <!-- Кнопка чата -->
+  <div class="chat-button" id="chatButton">
+    <i class="fas fa-comments"></i>
+  </div>
+  <!-- Окно чата -->
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+      <h3>Чат проекта</h3>
+      <button class="chat-close" id="chatClose">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Введите сообщение...">
+      <button id="chatSend"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>

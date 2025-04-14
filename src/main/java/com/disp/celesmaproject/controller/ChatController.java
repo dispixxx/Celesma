@@ -18,6 +18,7 @@ import java.nio.file.AccessDeniedException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class ChatController {
@@ -29,11 +30,10 @@ public class ChatController {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-
     @MessageMapping("/project-chat/{projectId}")
     @SendTo("/topic/project-chat/{projectId}")
-    public ChatMessage handleChatMessage(
-            @Payload ChatMessage message,
+    public ChatMessageDTO handleChatMessage(
+            @Payload ChatMessageDTO messageDTO,
             @DestinationVariable Long projectId,
             Principal principal) throws AccessDeniedException {
         Project project = projectService.getProjectById(projectId);
@@ -41,28 +41,55 @@ public class ChatController {
         List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(members);
         String username = principal.getName();
         User currentUser = userDetailsService.getUserByUsername(username);
-        boolean isMember = projectUsers.contains(currentUser);
-        if (!isMember) {
+
+        if (!projectUsers.contains(currentUser)) {
             throw new AccessDeniedException("Not a project member");
         }
 
-        // Добавляем информацию о времени
+        // Create and save the message
+        ChatMessage message = new ChatMessage();
+        message.setProject(project);
+        message.setSender(currentUser);
+        message.setContent(messageDTO.getContent());
         message.setTimestamp(LocalDateTime.now());
 
-        chatService.saveMessage(message);
-        return message;
+        ChatMessage savedMessage = chatService.saveMessage(message);
+
+        // Convert to DTO for sending to clients
+        return convertToDTO(savedMessage);
     }
 
     @GetMapping("/api/projects/{projectId}/chat-messages")
     @ResponseBody
-    public List<ChatMessage> getChatHistory(@PathVariable Long projectId) throws AccessDeniedException {
+    public List<ChatMessageDTO> getChatHistory(@PathVariable Long projectId) throws AccessDeniedException {
         Project project = projectService.getProjectById(projectId);
         List<ProjectMember> members = projectService.getSortedProjectMembers(project.getId());
         List<User> projectUsers = projectService.getConvertedProjectMembersToUsers(members);
-        boolean isMember = projectUsers.contains(userDetailsService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName()));
+        boolean isMember = projectUsers.contains(
+                userDetailsService.getUserByUsername(
+                        SecurityContextHolder.getContext().getAuthentication().getName()
+                )
+        );
+
         if (!isMember) {
             throw new AccessDeniedException("Not a project member");
         }
-        return chatService.getMessagesByProject(projectId);
+
+        List<ChatMessage> messages = chatService.getMessagesByProject(projectId);
+        return messages.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ChatMessageDTO convertToDTO(ChatMessage message) {
+        ChatMessageDTO dto = new ChatMessageDTO();
+        dto.setId(message.getId());
+        dto.setProjectId(message.getProject().getId());
+        dto.setSenderId(message.getSender().getId());
+        dto.setSenderUsername(message.getSender().getUsername());
+        dto.setSenderName(message.getSender().getFirstName() + " " + message.getSender().getLastName());
+        dto.setContent(message.getContent());
+        dto.setTimestamp(message.getTimestamp());
+        return dto;
     }
 }
