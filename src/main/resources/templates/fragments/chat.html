@@ -1,7 +1,10 @@
 <div th:fragment="chat" class="chat">
   <!-- Кнопка чата -->
-  <div class="chat-button" id="chatButton">
-    <i class="fas fa-comments"></i>
+  <div class="chat-button-wrapper">
+    <div class="chat-button" id="chatButton">
+      <i class="fas fa-comments"></i>
+      <div class="chat-badge" id="chatBadge" style="display: none;">0</div>
+    </div>
   </div>
   <!-- Окно чата -->
   <div class="chat-container" id="chatContainer">

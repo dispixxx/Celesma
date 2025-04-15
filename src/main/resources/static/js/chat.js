@@ -6,12 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
+    const chatBadge = document.getElementById('chatBadge');
 
     // Переменные STOMP
     let stompClient = null;
     const projectId = project.id;
     const currentUser = user.username;
     const isMember = isMemberCheck.value;
+
+    // Переменные для непрочитанных сообщений
+    let unreadMessagesCount = 0;
+    let isChatOpen = false;
 
     // Показывать/скрывать кнопку чата в зависимости от прав
     if (!isMember) {
@@ -26,11 +31,15 @@ document.addEventListener('DOMContentLoaded', function() {
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function(frame) {
-            // console.log('Connected: ' + frame);
-
             // Подписка на топик проекта
             stompClient.subscribe(`/topic/project-chat/${projectId}`, function(message) {
-                showMessage(JSON.parse(message.body));
+                const parsedMessage = JSON.parse(message.body);
+                showMessage(parsedMessage);
+
+                // Увеличиваем счетчик, если чат закрыт и сообщение не от текущего пользователя
+                if (!isChatOpen && parsedMessage.senderUsername !== currentUser) {
+                    incrementUnreadCount();
+                }
             });
 
             // Загрузка истории сообщений
@@ -53,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-// Отображение сообщения
+    // Отображение сообщения
     function showMessage(message) {
         const isCurrentUser = message.senderUsername === currentUser;
         const messageElement = document.createElement('div');
@@ -65,12 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         messageElement.innerHTML = `
-        <div class="message-content">${message.content}</div>
-        <div class="message-info">
-            <span class="sender-name">${isCurrentUser ? 'Вы' : message.senderUsername}</span>
-            <span class="message-time">${time}</span>
-        </div>
-    `;
+            <div class="message-content">${message.content}</div>
+            <div class="message-info">
+                <span class="sender-name">${isCurrentUser ? 'Вы' : message.senderUsername}</span>
+                <span class="message-time">${time}</span>
+            </div>
+        `;
 
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -86,22 +95,42 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Ошибка загрузки истории чата:', error));
     }
 
+    // Обновление счетчика непрочитанных сообщений
+    function incrementUnreadCount() {
+        unreadMessagesCount++;
+        updateBadge();
+    }
+
+    function resetUnreadCount() {
+        unreadMessagesCount = 0;
+        updateBadge();
+    }
+
+    function updateBadge() {
+        if (unreadMessagesCount > 0) {
+            chatBadge.style.display = 'flex';
+            chatBadge.textContent = unreadMessagesCount > 9 ? '9+' : unreadMessagesCount.toString();
+        } else {
+            chatBadge.style.display = 'none';
+        }
+    }
+
     // Обработчики событий
     chatButton.addEventListener('click', () => {
         chatContainer.style.display = 'flex';
+        isChatOpen = true;
+        resetUnreadCount();
     });
 
     chatClose.addEventListener('click', () => {
         chatContainer.style.display = 'none';
+        isChatOpen = false;
     });
 
     chatSend.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-
-    // Инициализация WebSocket
-    // initWebSocket();
 
     // Закрытие соединения при разгрузке страницы
     window.addEventListener('beforeunload', () => {
