@@ -65,6 +65,7 @@ public class ContentController {
         List<Task> createdTasks = taskService.getTasksByCreatorId(currentUser.getId()); // Задачи, где пользователь создатель
         List<Task> assignedTasks = taskService.getTasksByAssigneeId(currentUser.getId()); // Задачи, где пользователь исполнитель
 
+        model.addAttribute("user", currentUser);
         model.addAttribute("username", username);
         model.addAttribute("createdTasks", createdTasks);
         model.addAttribute("assignedTasks", assignedTasks);

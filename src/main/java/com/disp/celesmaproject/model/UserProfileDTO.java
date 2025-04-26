@@ -4,6 +4,7 @@ public class UserProfileDTO {
     private String username;
     private String firstName;
     private String lastName;
+    private String avatarUrl;
 
     // Геттеры и сеттеры
     public String getUsername() {
@@ -25,4 +26,12 @@ public class UserProfileDTO {
 
     public void setLastName(String lastName) {
         this.lastName = lastName; }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 }

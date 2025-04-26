@@ -19,6 +19,12 @@ import java.util.Objects;
 @RequestMapping("/projects/{projectId}/tasks")
 public class TaskController {
 
+    @ModelAttribute("user")
+    public User addUserToModel() {
+        String username = authenticationFacade.getAuthenticatedUsername();
+        return userDetailsService.getUserByUsername(username);
+    }
+
     @Autowired
     private TaskService taskService;
 

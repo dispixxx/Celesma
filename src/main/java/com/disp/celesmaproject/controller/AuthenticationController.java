@@ -1,3 +1,4 @@
+/*
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.AuthenticationRequest;
@@ -40,3 +41,4 @@ public class AuthenticationController {
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 }
+*/

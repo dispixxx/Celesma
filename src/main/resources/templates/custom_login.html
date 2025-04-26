@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Авторизация - celesma</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
       text-align: center;
-      /*background: linear-gradient(to bottom, #ffffff, #cce0ff);*/
       background: linear-gradient(to right, #eef2ff, #cfd9ff);
       margin: 0;
       padding: 0;
@@ -79,6 +79,18 @@
     .button:hover {
       background-color: #254eda;
     }
+    .button-google {
+      background-color: white;
+      color: #757575;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .button-google:hover {
+      background-color: #f8f8f8;
+    }
     .link {
       margin-top: 20px;
       font-size: 16px;
@@ -93,14 +105,39 @@
     }
     footer {
       text-align: center;
-      padding: 25px; /* Увеличенный отступ */
+      padding: 25px;
       background-color: #3366ff;
       color: white;
-      font-size: 20px; /* Увеличенный размер шрифта */
+      font-size: 20px;
       width: 100%;
       position: fixed;
       bottom: 0;
     }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #777;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+    .divider::before {
+      margin-right: 10px;
+    }
+    .divider::after {
+      margin-left: 10px;
+    }
+
+    /* Добавляем эффект при наведении */
+    .g-auth:hover {
+      background-color: #f5f5f5; /* Затемненный фон */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Легкая тень */
+      border-color: #bbb; /* Чуть темнее граница */
+    }
+
   </style>
 </head>
 <body>
@@ -114,6 +151,17 @@
     Invalid username or password. <br>
     Please try again.
   </div>
+
+  <div class="g-auth" style="margin: 15px 0; text-align: center;">
+    <a th:href="@{/oauth2/authorization/google}"
+       style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px; text-decoration: none; background: white; color: black; font-family: Arial, sans-serif; font-size: 14px; width: 100%;
+    box-sizing: border-box;">
+      <img th:src="${'image/g-logo.png'}" alt="" style="height: 20px; margin-right: 10px;">
+      Вход через аккаунт Google
+    </a>
+  </div>
+
+  <div class="divider">или</div>
 
   <form th:action="@{/login}" method="post">
 <!--    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>-->

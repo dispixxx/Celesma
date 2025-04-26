@@ -24,8 +24,16 @@
     </ul>
     <div class="user-container">
         <span class="user-name" sec:authentication="name"></span>
-        <a th:href="@{/user/profile/{un}(un=${username})}"  class="user-icon">
-            <i class="fas fa-user"></i>
+        <a th:href="@{/user/profile/{un}(un=${username})}" class="user-icon">
+            <!-- Аватарка с fallback на иконку -->
+            <div class="avatar-container">
+                <img th:if="${user.avatarUrl != null}"
+                     th:src="${user.avatarUrl}"
+                     class="profile-img"
+                     alt="User Avatar"
+                     onerror="this.onerror=null;this.src='/images/default-profile.png'">
+                <i th:unless="${user.avatarUrl != null}" class="fas fa-user default-icon"></i>
+            </div>
         </a>
     </div>
 </div>

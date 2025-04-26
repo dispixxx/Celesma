@@ -88,7 +88,7 @@
             margin-bottom: 30px;
         }
 
-        .avatar-container {
+        .avatar-container-profile {
             position: relative;
             width: 140px;
             height: 140px;
@@ -99,12 +99,12 @@
             transition: var(--transition);
         }
 
-        .avatar-container.editable-avatar {
+        .avatar-container-profile.editable-avatar {
             border: 3px dashed var(--primary);
             cursor: pointer;
         }
 
-        #userAvatar {
+        #userAvatar-profile {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -489,8 +489,8 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar-container" id="avatarContainer">
-                <img id="userAvatar" th:src="${userAvatarUrl ?: '/image/logo.png'}" alt="Аватар">
+            <div class="avatar-container-profile" id="avatarContainer-profile">
+                <img id="userAvatar-profile" th:src="${profileUserBigAvatarUrl != null ? profileUserBigAvatarUrl :'/image/logo.png'}" alt="Аватар">
                 <div id="avatarEditIcon" class="avatar-edit-icon">
                     <i class="fas fa-camera"></i>
                 </div>
@@ -579,7 +579,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 <script>
-    let originalAvatar = document.getElementById("userAvatar").src;
+    let originalAvatar = document.getElementById("userAvatar-profile").src;
     let editables = document.querySelectorAll('.editable');
     let originalValues = {};
     let isEditMode = false;
@@ -588,7 +588,7 @@
     // Toggle edit mode
     function toggleEditMode() {
         isEditMode = !isEditMode;
-        const avatarContainer = document.getElementById("avatarContainer");
+        const avatarContainer = document.getElementById("avatarContainer-profile");
         const avatarEditIcon = document.getElementById("avatarEditIcon");
         const lastNameElement = document.getElementById("edit-lastname");
         const firstNameElement = document.getElementById("edit-firstname");
@@ -616,7 +616,7 @@
             avatarContainer.classList.remove("editable-avatar");
             avatarEditIcon.style.display = "none";
             document.getElementById("saveChanges").style.display = "none";
-            document.getElementById("userAvatar").src = originalAvatar;
+            document.getElementById("userAvatar-profile").src = originalAvatar;
             lastNameElement.classList.remove("slide-right");
             firstNameElement.classList.remove("slide-right");
             lastNameElement.classList.add("slide-left");
@@ -625,7 +625,7 @@
     }
 
     // Avatar click handler
-    document.getElementById("avatarContainer").addEventListener("click", () => {
+    document.getElementById("avatarContainer-profile").addEventListener("click", () => {
         if (isEditMode) {
             document.getElementById("avatarInput").click();
         }
@@ -662,7 +662,7 @@
     document.getElementById("cropButton").addEventListener("click", () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas();
-            const croppedImage = document.getElementById("userAvatar");
+            const croppedImage = document.getElementById("userAvatar-profile");
             croppedImage.src = croppedCanvas.toDataURL();
             document.getElementById("imageEditor").style.display = "none";
             cropper.destroy();
@@ -688,7 +688,7 @@
             username: document.getElementById("username").innerText,
             firstName: document.getElementById("edit-firstname").innerText,
             lastName: document.getElementById("edit-lastname").innerText,
-            avatar: document.getElementById("userAvatar").src
+            avatar: document.getElementById("userAvatar-profile").src
         };
 
         fetch('/api/user/updateProfile', {
@@ -701,20 +701,7 @@
         })
             .then(response => {
                 if (response.ok) {
-                    showToast('Данные успешно сохранены!', 'success');
-                    document.getElementById("saveChanges").style.display = "none";
-                    document.querySelectorAll('.editable').forEach(el => {
-                        el.contentEditable = "false";
-                        el.classList.remove("active");
-                    });
-                    document.getElementById("avatarContainer").classList.remove("editable-avatar");
-                    document.getElementById("avatarEditIcon").style.display = "none";
-                    originalAvatar = document.getElementById("userAvatar").src;
-                    document.getElementById("edit-lastname").classList.remove("slide-right");
-                    document.getElementById("edit-firstname").classList.remove("slide-right");
-                    document.getElementById("edit-lastname").classList.add("slide-left");
-                    document.getElementById("edit-firstname").classList.add("slide-left");
-                    isEditMode = false;
+                    resetEdit()
                 } else {
                     showToast('Ошибка при сохранении данных', 'error');
                 }
@@ -723,6 +710,23 @@
                 console.error('Ошибка:', error);
                 showToast('Произошла ошибка', 'error');
             });
+    }
+
+    function resetEdit(){
+        showToast('Данные успешно сохранены!', 'success');
+        document.getElementById("saveChanges").style.display = "none";
+        document.querySelectorAll('.editable').forEach(el => {
+            el.contentEditable = "false";
+            el.classList.remove("active");
+        });
+        document.getElementById("avatarContainer-profile").classList.remove("editable-avatar");
+        document.getElementById("avatarEditIcon").style.display = "none";
+        originalAvatar = document.getElementById("userAvatar-profile").src;
+        document.getElementById("edit-lastname").classList.remove("slide-right");
+        document.getElementById("edit-firstname").classList.remove("slide-right");
+        document.getElementById("edit-lastname").classList.add("slide-left");
+        document.getElementById("edit-firstname").classList.add("slide-left");
+        isEditMode = false;
     }
 
     // Toast notification

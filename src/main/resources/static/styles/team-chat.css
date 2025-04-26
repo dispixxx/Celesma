@@ -31,7 +31,7 @@
 .chat-container {
     display: none;
     position: fixed;
-    bottom: 30px;
+    bottom: 170px;
     right: 30px;
     width: 350px;
     height: 500px;
@@ -163,6 +163,7 @@
     margin-top: 5px;
     opacity: 0.8;
     display: flex;
+    gap: 5px;
     justify-content: space-between;
 }
 

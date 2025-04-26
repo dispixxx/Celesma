@@ -15,8 +15,8 @@ public class User {
     private String password;
     private String firstName;
     private String lastName;
-    /*@Lob
-    private byte[] avatar;*/
+    @Column(length = 512)
+    private String avatarUrl;
     private String role; //ADMIN,USER GLOBAL ROL ON WEB SITE NOT ON PROJECT
 
     @OneToMany(mappedBy = "ownerUser")
@@ -76,6 +76,14 @@ public class User {
 
     public void setProjects(List<Project> projects) {
         this.projects = projects;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getRole() {

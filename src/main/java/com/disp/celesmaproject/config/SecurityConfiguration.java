@@ -1,6 +1,7 @@
 package com.disp.celesmaproject.config;
 
 //import com.disp.learnspringsecurity.filter.JwtRequestFilter;
+import com.disp.celesmaproject.model.CustomOAuth2UserService;
 import com.disp.celesmaproject.model.CustomUserDetailsService;
 import com.disp.celesmaproject.util.AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class SecurityConfiguration {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     /*jwt*/
 /*    @Autowired
@@ -39,7 +42,7 @@ public class SecurityConfiguration {
         return httpSecurity
 //                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->{
-                    auth.requestMatchers("/", "/welcome", "/register/**").permitAll();
+                    auth.requestMatchers("/", "/welcome", "/register/**","/oauth2/**","/login/**").permitAll();
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     auth.requestMatchers("/user/**").hasRole("USER"); //ROLE_USER
                     auth.anyRequest().authenticated();
@@ -49,9 +52,18 @@ public class SecurityConfiguration {
                             .loginPage("/login")
                             .defaultSuccessUrl("/dashboard")
                             .failureUrl("/login?error") // Перенаправление при ошибке аутентификации
-                            .successHandler(new AuthenticationSuccessHandler())//Для РОЛИ USER -> user/home; Для РОЛИ ADMIN -> admin/home
+                            .successHandler(new AuthenticationSuccessHandler())
                             .permitAll();
                 })
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard",true)
+                        .failureUrl("/login?error")
+                        .successHandler(new AuthenticationSuccessHandler())
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                )
                 .logout(httpSecurityLogoutConfigurer -> {
                     httpSecurityLogoutConfigurer
                             .logoutUrl("/logout")

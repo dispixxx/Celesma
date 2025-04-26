@@ -79,8 +79,12 @@ public class UserController {
         boolean isOwner = currentUser != null && currentUser.getId().equals(profileUser.getId());
         model.addAttribute("isOwner", isOwner);
 
+        String highQualityProfileUserPictureUrl = profileUser.getAvatarUrl() != null ? profileUser.getAvatarUrl().replace("s96-c", "s512-c"): null;
+
         // Заполнение модели
         model.addAttribute("profileUser", profileUser);
+        model.addAttribute("user", currentUser);
+        model.addAttribute("profileUserBigAvatarUrl",highQualityProfileUserPictureUrl);
         model.addAttribute("userFirstName", profileUser.getFirstName());
         model.addAttribute("userLastName", profileUser.getLastName());
         model.addAttribute("username", username);

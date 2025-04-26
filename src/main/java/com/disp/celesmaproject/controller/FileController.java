@@ -1,3 +1,4 @@
+/*
 package com.disp.celesmaproject.controller;
 
 import org.springframework.core.io.Resource;
@@ -29,3 +30,4 @@ public class FileController {
     }
 
 }
+*/
