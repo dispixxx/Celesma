@@ -684,26 +684,37 @@
     function saveChanges() {
         const csrfToken = document.querySelector("meta[name='_csrf']").content;
         const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
-        const userData = {
-            username: document.getElementById("username").innerText,
-            firstName: document.getElementById("edit-firstname").innerText,
-            lastName: document.getElementById("edit-lastname").innerText,
-            avatar: document.getElementById("userAvatar-profile").src
-        };
+
+        const formData = new FormData();
+        formData.append('username', document.getElementById("username").innerText);
+        formData.append('firstName', document.getElementById("edit-firstname").innerText);
+        formData.append('lastName', document.getElementById("edit-lastname").innerText);
+
+        const avatarInput = document.getElementById("avatarInput");
+        if (avatarInput.files.length > 0) {
+            formData.append('avatarFile', avatarInput.files[0]);
+        }
 
         fetch('/api/user/updateProfile', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 [csrfHeader]: csrfToken
             },
-            body: JSON.stringify(userData)
+            body: formData
         })
             .then(response => {
                 if (response.ok) {
-                    resetEdit()
+                    return response.json().then(data => {
+                        if (data.avatarUrl) {
+                            document.getElementById("userAvatar-profile").src = data.avatarUrl;
+                            document.getElementById("userAvatar-sidebar").srt = data.avatarUrl
+                        }
+                        resetEdit();
+                    });
                 } else {
-                    showToast('Ошибка при сохранении данных', 'error');
+                    return response.json().then(err => {
+                        showToast(err.message || 'Ошибка при сохранении данных', 'error');
+                    });
                 }
             })
             .catch(error => {
@@ -727,6 +738,7 @@
         document.getElementById("edit-lastname").classList.add("slide-left");
         document.getElementById("edit-firstname").classList.add("slide-left");
         isEditMode = false;
+        location.reload(true)
     }
 
     // Toast notification

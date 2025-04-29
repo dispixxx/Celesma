@@ -28,7 +28,7 @@
             <!-- Аватарка с fallback на иконку -->
             <div class="avatar-container">
                 <img th:if="${user.avatarUrl != null}"
-                     th:src="${user.avatarUrl}"
+                     id="userAvatar-sidebar" th:src="${user.avatarUrl}"
                      class="profile-img"
                      alt="User Avatar"
                      onerror="this.onerror=null;this.src='/images/default-profile.png'">
@@ -37,7 +37,6 @@
         </a>
     </div>
 </div>
-#<!-- Определение фрагмента -->
 </body>
 <script>
     function logout() {
