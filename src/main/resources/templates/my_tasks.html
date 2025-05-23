@@ -507,6 +507,37 @@
       font-size: 16px;
       margin: 0;
     }
+
+    .scroll-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: var(--transition);
+      opacity: 0;
+      visibility: hidden;
+      z-index: 999;
+    }
+
+    .scroll-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-to-top:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -682,6 +713,7 @@
 
 <script th:src="@{/js/sidebar.js}"></script>
 <script th:src="@{/js/star.js}"></script>
+<script th:src="@{/js/scroll-to-top.js}"></script>
 
 <script>
   // Функция для переключения между типами задач

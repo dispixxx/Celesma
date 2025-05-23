@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -139,16 +140,30 @@ public class TaskController {
                              @RequestParam(required = false) Long assigneeId,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                              @RequestParam TaskPriority priority,
-                             @AuthenticationPrincipal UserDetails userDetails) {
-        if(userDetailsService.getUserByUsername(userDetails.getUsername())!=null) {
-            User creator = userDetailsService.getUserByUsername(userDetails.getUsername());
-            Project project = projectService.getProjectById(projectId);
-            taskService.createTask(title, description, project, creator, assigneeId, endDate, TaskPriority.valueOf(priority.name()));
-            return "redirect:/projects/" + projectId;
+                             @AuthenticationPrincipal Object principal) { // Изменяем тип на Object
+
+        String username;
+        User creator;
+
+        if (principal instanceof UserDetails) {
+            // Обычная аутентификация
+            username = ((UserDetails) principal).getUsername();
+            creator = userDetailsService.getUserByUsername(username);
+        } else if (principal instanceof OAuth2User) {
+            // OAuth2 аутентификация (Google)
+            String email = ((OAuth2User) principal).getAttribute("email");
+            username = email.split("@")[0];
+            creator = userDetailsService.getUserByUsername(email);
+        } else {
+            throw new IllegalStateException("Unknown principal type: " + principal.getClass());
         }
-        else{
-            throw new UsernameNotFoundException(userDetails.getUsername());
+        if (creator == null) {
+            throw new UsernameNotFoundException(username);
         }
+
+        Project project = projectService.getProjectById(projectId);
+        taskService.createTask(title, description, project, creator, assigneeId, endDate, TaskPriority.valueOf(priority.name()));
+        return "redirect:/projects/" + projectId;
     }
 
 

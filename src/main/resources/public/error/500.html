@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>403 - Доступ запрещён</title>
+  <title>500 - Ошибка сервера</title>
   <style>
     :root {
       --primary: #3366ff;
@@ -51,7 +51,7 @@
     .error-icon {
       font-size: 80px;
       margin-bottom: 20px;
-      color: var(--warning);
+      color: var(--danger);
     }
 
     h1 {
@@ -87,10 +87,11 @@
 </head>
 <body>
 <div class="error-container">
-  <div class="error-icon">403</div>
-  <h1>Доступ запрещён</h1>
-  <p>У вас нет прав для просмотра этой страницы. Если вы считаете, что это ошибка, обратитесь к администратору.</p>
+  <div class="error-icon">500</div>
+  <h1>Внутренняя ошибка сервера</h1>
+  <p>Что-то пошло не так на нашей стороне. Мы уже работаем над устранением проблемы. Попробуйте обновить страницу позже.</p>
   <a href="/dashboard" class="btn btn-primary">На главную</a>
+  <a href="mailto:support@example.com" class="btn btn-primary" style="margin-left: 10px;">Написать в поддержку</a>
 </div>
 </body>
 </html>
