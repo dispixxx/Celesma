@@ -153,7 +153,7 @@ public class TaskController {
             // OAuth2 аутентификация (Google)
             String email = ((OAuth2User) principal).getAttribute("email");
             username = email.split("@")[0];
-            creator = userDetailsService.getUserByUsername(email);
+            creator = userDetailsService.getUserByEmail(email);
         } else {
             throw new IllegalStateException("Unknown principal type: " + principal.getClass());
         }
