@@ -34,7 +34,7 @@ public class Project {
 
     @ManyToMany
     @JoinTable(
-            name = "project_applicants",
+            name = "project_applicant",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
