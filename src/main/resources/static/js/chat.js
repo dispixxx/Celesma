@@ -116,10 +116,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Обработчики событий
-    chatButton.addEventListener('click', () => {
+    /*chatButton.addEventListener('click', () => {
         chatContainer.style.display = 'flex';
         isChatOpen = true;
         resetUnreadCount();
+    });*/
+
+    chatButton.addEventListener('click', () => {
+        if (chatContainer.style.display === 'flex') {
+            // Если чат открыт - закрываем
+            chatContainer.style.display = 'none';
+            isChatOpen = false;
+        } else {
+            // Если чат закрыт - открываем
+            chatContainer.style.display = 'flex';
+            isChatOpen = true;
+            resetUnreadCount();
+        }
     });
 
     chatClose.addEventListener('click', () => {

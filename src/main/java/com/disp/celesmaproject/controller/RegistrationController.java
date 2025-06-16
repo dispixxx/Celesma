@@ -1,6 +1,6 @@
 package com.disp.celesmaproject.controller;
 
-import com.disp.celesmaproject.model.CustomUserDetailsService;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

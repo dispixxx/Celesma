@@ -1,6 +1,9 @@
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.*;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
+import com.disp.celesmaproject.service.ProjectService;
+import com.disp.celesmaproject.service.TaskService;
 import com.disp.celesmaproject.util.AuthenticationFacade;
 import com.disp.celesmaproject.util.FileStorageService;
 import com.disp.celesmaproject.util.YandexDiskService;
@@ -130,7 +133,8 @@ public class UserController {
 
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 validateAvatarFile(avatarFile);
-                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile,username).getYandexDiskUrl();
+                User user = userDetailsService.getUserByUsername(username);
+                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile,user).getYandexDiskUrl();
                 if (avatarUrl != null || !Objects.equals(avatarUrl, "")) {
                     profileDto.setAvatarUrl(avatarUrl);
                 }

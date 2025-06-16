@@ -1,5 +1,8 @@
-package com.disp.celesmaproject.model;
+package com.disp.celesmaproject.service;
 
+import com.disp.celesmaproject.model.CustomUserDetails;
+import com.disp.celesmaproject.model.User;
+import com.disp.celesmaproject.model.UserProfileDTO;
 import com.disp.celesmaproject.util.AuthenticationFacade;
 import com.disp.celesmaproject.repo.UserRepository;
 import com.disp.celesmaproject.util.YandexDiskService;

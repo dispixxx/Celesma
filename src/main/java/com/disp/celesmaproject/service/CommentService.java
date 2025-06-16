@@ -1,5 +1,8 @@
-package com.disp.celesmaproject.model;
+package com.disp.celesmaproject.service;
 
+import com.disp.celesmaproject.model.Comment;
+import com.disp.celesmaproject.model.Task;
+import com.disp.celesmaproject.model.TaskHistory;
 import com.disp.celesmaproject.repo.CommentRepository;
 import com.disp.celesmaproject.repo.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;

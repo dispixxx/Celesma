@@ -1,6 +1,9 @@
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.*;
+import com.disp.celesmaproject.service.CommentService;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
+import com.disp.celesmaproject.service.TaskService;
 import com.disp.celesmaproject.util.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

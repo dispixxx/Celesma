@@ -576,6 +576,7 @@
 </div>
 
 <script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/toast.js}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 <script>
@@ -694,7 +695,6 @@
         if (avatarInput.files.length > 0) {
             formData.append('avatarFile', avatarInput.files[0]);
         }
-
         fetch('/api/user/updateProfile', {
             method: 'POST',
             headers: {
@@ -706,8 +706,11 @@
                 if (response.ok) {
                     return response.json().then(data => {
                         if (data.avatarUrl) {
-                            document.getElementById("userAvatar-profile").src = data.avatarUrl;
-                            document.getElementById("userAvatar-sidebar").srt = data.avatarUrl
+                            //Динамическое обновления аватарки. Для синхронности userAvatar-sidebar c userAvatar-profile
+                            const timestamp = Date.now();
+                            const newUrl = `${data.avatarUrl}?t=${timestamp}`;
+                            document.getElementById("userAvatar-profile").src = newUrl;
+                            document.getElementById("userAvatar-sidebar").src = newUrl;
                         }
                         resetEdit();
                     });
@@ -738,37 +741,11 @@
         document.getElementById("edit-lastname").classList.add("slide-left");
         document.getElementById("edit-firstname").classList.add("slide-left");
         isEditMode = false;
-        location.reload(true)
+        // location.reload(true)
     }
 
-    // Toast notification
-    function showToast(message, type) {
-        const toast = document.createElement('div');
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.right = '20px';
-        toast.style.padding = '12px 24px';
-        toast.style.borderRadius = '4px';
-        toast.style.color = 'white';
-        toast.style.fontWeight = '500';
-        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        toast.style.zIndex = '1000';
-        toast.style.animation = 'fadeIn 0.3s ease-out';
 
-        if (type === 'success') {
-            toast.style.backgroundColor = '#28a745';
-        } else {
-            toast.style.backgroundColor = '#dc3545';
-        }
 
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = 'fadeOut 0.3s ease-out';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
 </script>
 
 </body>

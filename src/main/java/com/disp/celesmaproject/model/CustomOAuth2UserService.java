@@ -1,11 +1,9 @@
 package com.disp.celesmaproject.model;
 
-import com.disp.celesmaproject.model.User;
 import com.disp.celesmaproject.repo.UserRepository;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.util.CustomOAuth2UserAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;

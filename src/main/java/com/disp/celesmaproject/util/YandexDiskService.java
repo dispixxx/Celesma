@@ -1,6 +1,7 @@
 package com.disp.celesmaproject.util;
 
 import com.disp.celesmaproject.model.UploadResponse;
+import com.disp.celesmaproject.model.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
@@ -21,9 +22,6 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 public class YandexDiskService {
@@ -40,40 +38,40 @@ public class YandexDiskService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
-
-    public UploadResponse uploadFileToYandexDisk(MultipartFile file, String username) throws IOException {
+    public UploadResponse uploadFileToYandexDisk(MultipartFile file, User user) throws IOException {
         UploadResponse response = new UploadResponse();
         response.setOriginalFileName(file.getOriginalFilename());
 
-        String newFileName = generateFileName(file.getOriginalFilename(), username);
+        String newAvatarName = generateFileName(file.getOriginalFilename(), user.getUsername());
 
-        // 1. Асинхронное удаление старых аватарок
-        CompletableFuture.runAsync(() -> {
-            try {
-                deleteOldAvatars(username);
-            } catch (IOException e) {
-                // Логирование ошибки
-            }
-        }, executorService);
+        // 1. Удалить старый файл.
+        deleteOldAvatar(user);
 
         // 2. Параллельное получение URL для загрузки
-        String uploadUrl = getUploadUrl(newFileName);
+        String uploadUrl = getUploadUrl(newAvatarName);
 
         // 3. Загрузка файла
         uploadFile(uploadUrl, file);
 
-        // 4. Получение превью (можно сделать асинхронно)
-        String previewUrl = getFilePreviewUrl(newFileName);
+        // Время для загрузки
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 4. Получение превью
+        String previewUrl = getFilePreviewUrl(newAvatarName);
 
         response.setYandexDiskUrl(previewUrl);
-        response.setGeneratedFileName(newFileName);
+        response.setGeneratedFileName(newAvatarName);
+
+        user.setAvatarName(newAvatarName);
 
         return response;
     }
 
-    private void deleteOldAvatars(String username) throws IOException {
-        String searchPattern = "avatar_" + username + "_";
+    private void deleteOldAvatar(User user) throws IOException {
         String encodedPath = URLEncoder.encode(uploadDir, StandardCharsets.UTF_8);
 
         String url = apiUrl + "/resources?path=" + encodedPath +
@@ -83,19 +81,7 @@ public class YandexDiskService {
         HttpGet request = new HttpGet(url);
         request.setHeader("Authorization", "OAuth " + oauthToken);
 
-        HttpResponse response = client.execute(request);
-        HttpEntity entity = response.getEntity();
-
-        JsonNode jsonNode = objectMapper.readTree(entity.getContent());
-        JsonNode items = jsonNode.path("_embedded").path("items");
-
-        // Удаляем все файлы, начинающиеся с avatar_username_
-        for (JsonNode item : items) {
-            String fileName = item.path("name").asText();
-            if (fileName.startsWith(searchPattern)) {
-                deleteFile(fileName);
-            }
-        }
+        deleteFile(user.getAvatarName());
     }
 
     private void deleteFile(String fileName) throws IOException {

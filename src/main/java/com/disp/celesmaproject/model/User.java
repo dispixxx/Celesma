@@ -17,6 +17,7 @@ public class User {
     private String lastName;
     @Column(length = 512)
     private String avatarUrl;
+    private String avatarName = "default";
     private String role; //ADMIN,USER GLOBAL ROL ON WEB SITE NOT ON PROJECT
 
     @OneToMany(mappedBy = "ownerUser")
@@ -105,5 +106,13 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id); // Хэш на основе id
+    }
+
+    public String getAvatarName() {
+        return avatarName;
+    }
+
+    public void setAvatarName(String avatarName) {
+        this.avatarName = avatarName;
     }
 }

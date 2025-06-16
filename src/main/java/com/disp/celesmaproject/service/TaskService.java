@@ -1,6 +1,7 @@
-package com.disp.celesmaproject.model;
+package com.disp.celesmaproject.service;
 
 
+import com.disp.celesmaproject.model.*;
 import com.disp.celesmaproject.repo.TaskHistoryRepository;
 import com.disp.celesmaproject.repo.TaskRepository;
 import com.disp.celesmaproject.repo.UserRepository;

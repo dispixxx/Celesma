@@ -1,9 +1,10 @@
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.*;
-import com.disp.celesmaproject.util.AuthenticationFacade;
+import com.disp.celesmaproject.service.ChatService;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
+import com.disp.celesmaproject.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;

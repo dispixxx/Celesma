@@ -1,5 +1,6 @@
-package com.disp.celesmaproject.model;
+package com.disp.celesmaproject.service;
 
+import com.disp.celesmaproject.model.ChatMessage;
 import com.disp.celesmaproject.repo.ChatMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

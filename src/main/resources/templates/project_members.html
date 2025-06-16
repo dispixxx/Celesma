@@ -526,28 +526,24 @@
             button.addEventListener("click", function (e) {
                 e.stopPropagation();
                 currentMemberCard = button.closest(".member-card");
-                const currentRole = currentMemberCard.querySelector(".member-role").textContent;
-                roleSelect.value = currentRole;
+                roleSelect.value = currentMemberCard.querySelector(".member-role").textContent;
 
                 // Скрываем все открытые dropdown перед показом нового
                 document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
 
-                // Удаляем класс selected со всех карточек перед добавлением к текущей
+                // Удаляем класс selected со всех карточек
                 document.querySelectorAll('.member-card').forEach(card => card.classList.remove('selected'));
 
                 currentMemberCard.classList.add('selected');
 
+                // Получаем позицию кнопки
+                const buttonRect = button.getBoundingClientRect();
+
+                // Устанавливаем позицию dropdown
+                changeRoleDropdown.style.position = 'absolute';
+                // changeRoleDropdown.style.top = `${buttonRect.bottom + window.scrollY}px`;
+                // changeRoleDropdown.style.left = `${buttonRect.left + window.scrollX}px`;
                 changeRoleDropdown.style.display = "block";
-
-                const cardRect = currentMemberCard.getBoundingClientRect();
-                const dropdownRect = changeRoleDropdown.getBoundingClientRect();
-
-                // Расчитываем позицию dropdown, чтобы он появился прямо над карточкой
-                const top = cardRect.top + window.scrollY + 20 ; // 10px отступ сверху для визуального разделения
-                const left = cardRect.left + window.scrollX - dropdownRect.width;
-
-                changeRoleDropdown.style.top = `${top}px`;
-                changeRoleDropdown.style.left = `${left}px`;
             });
         });
 

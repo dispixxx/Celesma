@@ -1,5 +1,6 @@
-package com.disp.celesmaproject.model;
+package com.disp.celesmaproject.service;
 
+import com.disp.celesmaproject.model.*;
 import com.disp.celesmaproject.util.AuthenticationFacade;
 import com.disp.celesmaproject.repo.ProjectMemberRepository;
 import com.disp.celesmaproject.repo.UserRepository;
@@ -212,7 +213,7 @@ public class ProjectService {
                 .toList();*/
     }
 
-    //Добавляем пользователя в список желащтх вступить
+    //Добавляем пользователя в список желающих вступить
     public void addJoinRequest(Project project, User user) {
         // Проверяем, не подал ли пользователь уже заявку и не числится ли пользователь в уже проекте
         List<User> alreadyMembers = project.getMembers().stream().map(ProjectMember::getUser).toList();

@@ -2,7 +2,7 @@ package com.disp.celesmaproject.config;
 
 //import com.disp.learnspringsecurity.filter.JwtRequestFilter;
 import com.disp.celesmaproject.model.CustomOAuth2UserService;
-import com.disp.celesmaproject.model.CustomUserDetailsService;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.util.AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

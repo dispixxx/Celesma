@@ -1,6 +1,6 @@
 package com.disp.celesmaproject.filter;
 
-import com.disp.celesmaproject.model.CustomUserDetailsService;
+import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
