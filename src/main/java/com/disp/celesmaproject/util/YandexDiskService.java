@@ -10,7 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -42,20 +42,19 @@ public class YandexDiskService {
         UploadResponse response = new UploadResponse();
         response.setOriginalFileName(file.getOriginalFilename());
 
-        String newAvatarName = generateFileName(file.getOriginalFilename(), user.getUsername());
+        String newAvatarName = generateFileName(Objects.requireNonNull(file.getOriginalFilename()), user.getUsername());
 
         // 1. Удалить старый файл.
-        deleteOldAvatar(user);
+//        deleteOldAvatar(user.getAvatarName());
 
         // 2. Параллельное получение URL для загрузки
         String uploadUrl = getUploadUrl(newAvatarName);
 
         // 3. Загрузка файла
-        uploadFile(uploadUrl, file);
+        uploadFile(uploadUrl, file.getBytes(), file.getContentType());
 
-        // Время для загрузки
-        try {
-            Thread.sleep(1000);
+        try{
+            Thread.sleep(300);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -63,25 +62,27 @@ public class YandexDiskService {
         // 4. Получение превью
         String previewUrl = getFilePreviewUrl(newAvatarName);
 
-        response.setYandexDiskUrl(previewUrl);
-        response.setGeneratedFileName(newAvatarName);
+        if (previewUrl != null) {
+            deleteOldAvatar(user.getAvatarName());
+            user.setAvatarName(newAvatarName);
+        }
 
-        user.setAvatarName(newAvatarName);
+        response.setPreview(previewUrl);
+        response.setGeneratedFileName(newAvatarName);
 
         return response;
     }
 
-    private void deleteOldAvatar(User user) throws IOException {
+    private void deleteOldAvatar(String oldAvatar) throws IOException {
         String encodedPath = URLEncoder.encode(uploadDir, StandardCharsets.UTF_8);
 
         String url = apiUrl + "/resources?path=" + encodedPath +
                 "&fields=items.name&limit=100&preview_size=M";
 
-        HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(url);
         request.setHeader("Authorization", "OAuth " + oauthToken);
 
-        deleteFile(user.getAvatarName());
+        deleteFile(oldAvatar);
     }
 
     private void deleteFile(String fileName) throws IOException {
@@ -128,17 +129,22 @@ public class YandexDiskService {
         return jsonNode.get("href").asText();
     }
 
-    private void uploadFile(String uploadUrl, MultipartFile file) throws IOException {
+
+    private void uploadFile(String uploadUrl, byte[] file, String contentType) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut request = new HttpPut(uploadUrl);
 
-        InputStream inputStream = file.getInputStream();
-        InputStreamEntity entity = new InputStreamEntity(inputStream, file.getSize());
+        ByteArrayEntity entity = new ByteArrayEntity(file);
         request.setEntity(entity);
-        request.setHeader("Content-Type", file.getContentType());
+        request.setHeader("Content-Type", contentType);
 
-        client.execute(request);
-        inputStream.close();
+        // Ожидаем завершения запроса
+        HttpResponse response = client.execute(request);
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        if (statusCode != 201 && statusCode != 200) {
+            throw new IOException("Ошибка загрузки файла. Код: " + statusCode);
+        }
     }
 
     private String getFilePreviewUrl(String fileName) throws IOException {

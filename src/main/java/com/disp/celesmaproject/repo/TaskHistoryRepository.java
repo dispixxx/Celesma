@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> {
 
@@ -14,4 +15,7 @@ public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> 
 
     @Query("SELECT h FROM TaskHistory h WHERE h.task.id = :taskId ORDER BY h.timestamp ASC")
     List<TaskHistory> findByTaskIdOrderByTimestampAsc(@Param("taskId") Long taskId);
+
+//    Optional<TaskHistory> findTop1ByUserIdOrderByTimestamp(Long userId);
+    List<TaskHistory> findByUserIdOrderByTimestamp(Long userId);
 }

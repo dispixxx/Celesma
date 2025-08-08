@@ -39,7 +39,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (userOptional.isPresent()) {
             // Обновляем существующего пользователя
             user = userOptional.get();
-            if (user.getAvatarUrl() == null || !user.getAvatarUrl().equals(pictureUrl)) {
+            if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()){
                 user.setAvatarUrl(pictureUrl);
             }
 /*            user.setFirstName(firstName);

@@ -88,19 +88,19 @@ public class SecurityConfiguration {
                 .build();
     }*/
 
-    @Bean
+/*    @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder())
                 .and()
                 .build();
-    }
+    }*/
 
-    @Bean
+/*    @Bean
     WebSecurityCustomizer configureWebSecurity() {
         return (web) -> web.ignoring().requestMatchers("/image/**", "/js/**", "/css/**", "/webjars/**");
-    }
+    }*/
 
 /*//    InMemoryUserAuth
     @Bean
@@ -118,18 +118,18 @@ public class SecurityConfiguration {
         return new InMemoryUserDetailsManager(normalUser, adminUser);
     }*/
 
-    @Bean
+/*    @Bean
     public UserDetailsService userDetailsService() {
         return userDetailsService;
-    }
+    }*/
 
-    @Bean
+/*    @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-    }
+    }*/
 
     @Bean
     PasswordEncoder passwordEncoder() {

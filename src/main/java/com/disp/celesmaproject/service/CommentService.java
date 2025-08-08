@@ -35,4 +35,8 @@ public class CommentService {
         taskRepository.save(task);
         return commentRepository.save(comment);
     }
+
+    public Comment getLastCommentByUserId(Long userId) {
+        return commentRepository.findTop1ByAuthorIdOrderByCreatedAtDesc(userId).orElseThrow(null);
+    }
 }

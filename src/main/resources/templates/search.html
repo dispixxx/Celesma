@@ -1,433 +1,448 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="ru">
 <head>
-  <meta name="_csrf" th:content="${_csrf.token}">
-  <meta name="_csrf_header" th:content="${_csrf.headerName}">
-  <meta charset="UTF-8">
-  <title>Поиск проекта | TaskFlow</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
-  <style>
-    :root {
-      --primary: #3366ff;
-      --primary-light: #6c8cff;
-      --primary-dark: #254eda;
-      --secondary: #6fbf73;
-      --danger: #ff6666;
-      --warning: #ffb84d;
-      --info: #6c8cff;
-      --gray: #a0a0a0;
-      --light-gray: #f5f7fa;
-      --dark-gray: #6c757d;
-      --white: #ffffff;
-      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --border-radius: 12px;
-      --transition: all 0.3s ease;
-    }
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta charset="UTF-8">
+    <title>Поиск проекта | TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
+    <style>
+        :root {
+            --primary: #3366ff;
+            --primary-light: #6c8cff;
+            --primary-dark: #254eda;
+            --secondary: #6fbf73;
+            --danger: #ff6666;
+            --warning: #ffb84d;
+            --info: #6c8cff;
+            --gray: #a0a0a0;
+            --light-gray: #f5f7fa;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
 
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(to right, #eef2ff, #cfd9ff);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      min-height: 100vh;
-    }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #eef2ff, #cfd9ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
 
-    .main-content {
-      flex-grow: 1;
-      padding: 0 2rem;
-      transition: margin-left 0.3s;
-      max-width: 1400px;
-      margin: 40px auto;
-    }
+        .main-content {
+            flex-grow: 1;
+            padding: 0 2rem;
+            transition: margin-left 0.3s;
+            max-width: 1400px;
+            margin: 40px auto;
+        }
 
-    /* Header */
-    .dashboard-header {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 15px;
-      margin-bottom: 30px;
-    }
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-    .dashboard-title {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 600;
-      font-size: 28px;
-      color: var(--primary);
-      margin: 0;
-    }
+        .dashboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 28px;
+            color: var(--primary);
+            margin: 0;
+        }
 
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 20px;
-      border-radius: var(--border-radius);
-      font-weight: 600;
-      text-decoration: none;
-      transition: var(--transition);
-      border: none;
-      cursor: pointer;
-      font-size: 15px;
-      gap: 8px;
-      white-space: nowrap;
-    }
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            gap: 8px;
+            white-space: nowrap;
+        }
 
-    .btn-primary {
-      background-color: var(--primary);
-      color: white;
-    }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
 
-    .btn-primary:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(51, 102, 255, 0.3);
-    }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(51, 102, 255, 0.3);
+        }
 
-    .btn-secondary {
-      background-color: var(--light-gray);
-      color: var(--primary);
-    }
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--primary);
+        }
 
-    .btn-secondary:hover {
-      background-color: #e6e9f2;
-      transform: translateY(-2px);
-    }
+        .btn-secondary:hover {
+            background-color: #e6e9f2;
+            transform: translateY(-2px);
+        }
 
-    /* Search Form */
-    .search-container {
-      display: flex;
-      max-width: 600px;
-      margin-bottom: 30px;
-      width: 100%;
-    }
+        /* Search Form */
+        .search-container {
+            display: flex;
+            max-width: 600px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
 
-    .search-input {
-      flex: 1;
-      padding: 12px 20px;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius) 0 0 var(--border-radius);
-      font-size: 16px;
-      outline: none;
-      transition: var(--transition);
-    }
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            font-size: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
 
-    .search-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(51, 102, 255, 0.2);
-    }
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(51, 102, 255, 0.2);
+        }
 
-    .search-btn {
-      padding: 0 20px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 0 var(--border-radius) var(--border-radius) 0;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-    }
+        .search-btn {
+            padding: 0 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
 
-    .search-btn:hover {
-      background-color: var(--primary-dark);
-    }
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
 
-    /* Messages */
-    .message {
-      padding: 15px 20px;
-      border-radius: var(--border-radius);
-      margin-bottom: 20px;
-      background-color: var(--white);
-      box-shadow: var(--card-shadow);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        /* Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            background-color: var(--white);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .message-info {
-      color: var(--dark-gray);
-      border-left: 4px solid var(--gray);
-    }
+        .message-info {
+            color: var(--dark-gray);
+            border-left: 4px solid var(--gray);
+        }
 
-    .message-error {
-      color: var(--danger);
-      border-left: 4px solid var(--danger);
-      background-color: rgba(255, 102, 102, 0.05);
-    }
+        .message-error {
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+            background-color: rgba(255, 102, 102, 0.05);
+        }
 
-    /* Projects Grid */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      width: 100%;
-    }
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
 
-    /* Project Card */
-    .project-card {
-      background: var(--white);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      padding: 20px;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      height: 260px;
-    }
+        /* Project Card */
+        .project-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 260px;
+        }
 
-    .project-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
 
-    .project-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 15px;
-      gap: 10px;
-    }
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
 
-    .project-name {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0;
-      color: #2C2F33;
-      flex: 1;
-      word-break: break-word;
-    }
+        .project-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            color: #2C2F33;
+            flex: 1;
+            word-break: break-word;
+        }
 
-    .project-role {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-weight: 600;
-      margin-left: 10px;
-      white-space: nowrap;
-    }
+        .project-role {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
 
-    .role-admin {
-      background-color: rgba(255, 0, 0, 0.1);
-      color: var(--danger);
-    }
+        .role-admin {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: var(--danger);
+        }
 
-    .role-moderator {
-      background-color: rgba(0, 128, 0, 0.1);
-      color: var(--secondary);
-    }
+        .role-moderator {
+            background-color: rgba(0, 128, 0, 0.1);
+            color: var(--secondary);
+        }
 
-    .role-member {
-      background-color: rgba(74, 107, 255, 0.1);
-      color: var(--primary);
-    }
+        .role-member {
+            background-color: rgba(74, 107, 255, 0.1);
+            color: var(--primary);
+        }
 
-    .project-description {
-      color: var(--dark-gray);
-      font-size: 14px;
-      margin: 10px 0;
-      flex-grow: 1;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .role-viewer {
+            background-color: transparent;
+            color: transparent;
+        }
 
-    .project-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-    }
+        .project-description {
+            color: var(--dark-gray);
+            font-size: 14px;
+            margin: 10px 0;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    .progress-container {
-      width: 100%;
-      height: 6px;
-      background-color: var(--light-gray);
-      border-radius: 3px;
-      margin: 10px 0;
-      overflow: hidden;
-    }
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
 
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(to right, var(--primary), var(--primary-light));
-      border-radius: 3px;
-      width: 65%;
-    }
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: var(--light-gray);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
 
-    .open-btn {
-      padding: 8px 16px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            border-radius: 3px;
+            width: 65%;
+        }
 
-    .open-btn:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-2px);
-    }
+        .open-btn {
+            padding: 8px 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      background: var(--white);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      grid-column: 1 / -1;
-    }
+        .open-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
 
-    .empty-icon {
-      font-size: 48px;
-      color: var(--gray);
-      margin-bottom: 20px;
-    }
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            grid-column: 1 / -1;
+        }
 
-    .empty-text {
-      color: var(--dark-gray);
-      margin-bottom: 20px;
-    }
+        .empty-icon {
+            font-size: 48px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .main-content {
-        padding: 20px;
-      }
+        .empty-text {
+            color: var(--dark-gray);
+            margin-bottom: 20px;
+        }
 
-      .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        margin-bottom: 0;
-      }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
 
-      .projects-grid {
-        grid-template-columns: 1fr;
-      }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                margin-bottom: 0;
+            }
 
-      .search-container {
-        flex-direction: column;
-      }
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
 
-      .search-input {
-        border-radius: var(--border-radius) var(--border-radius) 0 0;
-      }
+            .search-container {
+                flex-direction: column;
+            }
 
-      .search-btn {
-        border-radius: 0 0 var(--border-radius) var(--border-radius);
-        padding: 12px;
-        justify-content: center;
-      }
-    }
+            .search-input {
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
 
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+            .search-btn {
+                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                padding: 12px;
+                justify-content: center;
+            }
+        }
 
-    .project-card {
-      animation: fadeIn 0.4s ease-out forwards;
-    }
-  </style>
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-card {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
 </head>
 <body>
 
 <div th:insert="~{fragments/sidebar :: sidebar(username=${#authentication.name})}"></div>
 
 <div class="main-content">
-  <div class="dashboard-header">
-    <h1 class="dashboard-title">Поиск проектов</h1>
-    <div class="actions">
-      <a href="/projects/new" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Новый проект
-      </a>
-    </div>
-  </div>
-
-  <!-- Search Form -->
-  <form th:action="@{/projects/search}" method="get" class="search-container">
-    <input
-            type="text"
-            name="query"
-            class="search-input"
-            placeholder="Введите название проекта или ID..."
-            th:value="${query}"
-            aria-label="Поиск проекта"
-    >
-    <button type="submit" class="search-btn">
-      <i class="fas fa-search"></i> Поиск
-    </button>
-  </form>
-
-  <!-- Messages -->
-  <div th:if="${query == null or query.isEmpty()}" class="message message-info">
-    <i class="fas fa-info-circle"></i> Введите название проекта или ID для поиска
-  </div>
-
-  <div th:if="${searchPerformed and (projects == null or projects.isEmpty())}" class="message message-error">
-    <i class="fas fa-exclamation-circle"></i> Проекты не найдены. Попробуйте изменить параметры поиска.
-  </div>
-
-  <!-- Projects Grid -->
-  <div class="projects-grid">
-    <div th:each="project : ${projects}" class="project-card">
-      <div class="project-header">
-        <h3 class="project-name" th:text="${project.name}">Название проекта</h3>
-        <span th:if="${project.getMemberRole(user) eq projectRoles[0]}"
-              class="project-role role-admin">Админ</span>
-        <span th:if="${project.getMemberRole(user) eq projectRoles[1]}"
-              class="project-role role-moderator">Модератор</span>
-        <span th:if="${!(project.getMemberRole(user) eq projectRoles[0] || project.getMemberRole(user) eq projectRoles[1])}"
-              class="project-role role-member">Участник</span>
-      </div>
-
-      <p class="project-description" th:text="${project.description} ?: 'Описание отсутствует'">
-        Краткое описание проекта
-      </p>
-
-      <div class="progress-container">
-<!--        <div class="progress-bar"></div>-->
-      </div>
-
-      <div class="project-footer">
-<!--        <span class="progress-text" style="font-size: 12px; color: var(&#45;&#45;gray);">65% завершено</span>-->
-        <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-primary" style="padding: 8px 16px;">
-          Открыть
-        </a>
-      </div>
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Поиск проектов</h1>
+        <div class="actions">
+            <a href="/projects/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Новый проект
+            </a>
+        </div>
     </div>
 
-    <!-- Empty State -->
-    <div th:if="${searchPerformed and (projects == null or projects.isEmpty())}" class="empty-state">
-      <div class="empty-icon">
-        <i class="fas fa-folder-open"></i>
-      </div>
-      <h3>Проекты не найдены</h3>
-      <p class="empty-text">Попробуйте изменить параметры поиска или создать новый проект</p>
-      <a href="/projects/new" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Создать проект
-      </a>
+    <!-- Search Form -->
+    <form th:action="@{/projects/search}" method="get" class="search-container">
+        <input
+                type="text"
+                name="query"
+                class="search-input"
+                placeholder="Введите название проекта или ID..."
+                th:value="${query}"
+                aria-label="Поиск проекта"
+        >
+        <button type="submit" class="search-btn">
+            <i class="fas fa-search"></i> Поиск
+        </button>
+    </form>
+
+    <!-- Messages -->
+    <div th:if="${query == null or query.isEmpty()}" class="message message-info">
+        <i class="fas fa-info-circle"></i> Введите название проекта или ID для поиска
     </div>
-  </div>
+
+    <div th:if="${searchPerformed and (projects == null or projects.isEmpty())}" class="message message-error">
+        <i class="fas fa-exclamation-circle"></i> Проекты не найдены. Попробуйте изменить параметры поиска.
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="projects-grid">
+        <div th:each="project : ${projects}" class="project-card">
+            <div class="project-header">
+                <h3 class="project-name" th:text="${project.name}">Название проекта</h3>
+                <span th:if="${project.getMemberRole(user) eq projectRoles[0]}"
+                      class="project-role role-admin">Админ</span>
+                <span th:if="${project.getMemberRole(user) eq projectRoles[1]}"
+                      class="project-role role-moderator">Модератор</span>
+                <span th:if="${project.getMemberRole(user) eq projectRoles[2]}"
+                      class="project-role role-member">Участник</span>
+
+                <span th:if="${project.getMemberRole(user) eq null}"
+                      class="project-role role-viewer"></span>
+            </div>
+
+            <p class="project-description" th:text="${project.description} ?: 'Описание отсутствует'">
+                Краткое описание проекта
+            </p>
+
+            <div class="progress-container">
+                <!--        <div class="progress-bar"></div>-->
+            </div>
+
+            <div class="project-footer">
+                <!--        <span class="progress-text" style="font-size: 12px; color: var(&#45;&#45;gray);">65% завершено</span>-->
+                <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-primary" style="padding: 8px 16px;">
+                    Открыть
+                </a>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${searchPerformed and (projects == null or projects.isEmpty())}" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h3>Проекты не найдены</h3>
+            <p class="empty-text">Попробуйте изменить параметры поиска или создать новый проект</p>
+            <a href="/projects/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать проект
+            </a>
+        </div>
+    </div>
 </div>
 
 <script th:src="@{/js/sidebar.js}"></script>

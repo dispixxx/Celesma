@@ -114,4 +114,8 @@ public class TaskService {
             return taskHistoryRepository.findByTaskIdOrderByTimestampDesc(taskId);
         }
     }
+
+    public List<TaskHistory> getLastTaskHistoryByUserId(Long userId) {
+        return taskHistoryRepository.findByUserIdOrderByTimestamp(userId);
+    }
 }

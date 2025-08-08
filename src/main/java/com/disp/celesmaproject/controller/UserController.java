@@ -1,6 +1,7 @@
 package com.disp.celesmaproject.controller;
 
 import com.disp.celesmaproject.model.*;
+import com.disp.celesmaproject.service.CommentService;
 import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.service.ProjectService;
 import com.disp.celesmaproject.service.TaskService;
@@ -19,7 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class UserController {
@@ -38,9 +40,6 @@ public class UserController {
 
     @Autowired
     private YandexDiskService yandexDiskService;
-
-    @Autowired
-    private FileStorageService fileStorageService;
 
 /*    //Свой профиль
     @GetMapping("/user/profile")
@@ -74,8 +73,7 @@ public class UserController {
     @GetMapping("/user/profile/{username}")
     public String viewUserProfile(
             @PathVariable String username,
-            Model model,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            Model model) {
 
         // Получаем пользователя по username из URL
         User profileUser = userDetailsService.getUserByUsername(username);
@@ -112,6 +110,12 @@ public class UserController {
         model.addAttribute("taskCountAsCreator", taskService.getTaskCountByCreator(profileUser.getId()));
         model.addAttribute("completedTaskCount", taskService.getCompletedTaskCountByUser(profileUser.getId()));
 
+        //Активность
+        assert currentUser != null;
+//        Comment lastComment = commentService.getLastCommentByUserId(currentUser.getId());
+        List<TaskHistory> taskHistoryChanges = taskService.getLastTaskHistoryByUserId(profileUser.getId());
+        List<TaskHistory> lastTaskHistoryChanges = taskHistoryChanges.subList(0, taskHistoryChanges.size() - 1);
+        model.addAttribute("lastTaskHistoryChanges", lastTaskHistoryChanges);
         return "user_profile";
     }
 
@@ -134,13 +138,9 @@ public class UserController {
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 validateAvatarFile(avatarFile);
                 User user = userDetailsService.getUserByUsername(username);
-                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile,user).getYandexDiskUrl();
-                if (avatarUrl != null || !Objects.equals(avatarUrl, "")) {
-                    profileDto.setAvatarUrl(avatarUrl);
-                }
-                else profileDto.setAvatarUrl(null);
+                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile,user).getPreview();
+                if (!avatarUrl.isEmpty()) profileDto.setAvatarUrl(avatarUrl);
             }
-
             User updatedUser = userDetailsService.updateUserProfile(profileDto);
             return ResponseEntity.ok(convertToDto(updatedUser));
 
@@ -165,8 +165,8 @@ public class UserController {
 
     private void validateAvatarFile(MultipartFile file) {
         // Максимальный размер файла - 5MB
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new IllegalArgumentException("Размер файла не должен превышать 5MB");
+        if (file.getSize() > 1024 * 1024) {
+            throw new IllegalArgumentException("Размер файла не должен превышать 1MB");
         }
 
         // Проверяем, что файл является изображением

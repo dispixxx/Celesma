@@ -3,7 +3,7 @@ package com.disp.celesmaproject.model;
 public class UploadResponse {
     private String originalFileName;
 //    private String localFileUrl;    // Локальная ссылка на файл
-    private String yandexDiskUrl;   // Прямая ссылка на превью в Яндекс.Диске
+    private String preview;   // Прямая ссылка на превью в Яндекс.Диске
     private String generatedFileName;
 
     public String getOriginalFileName() {
@@ -14,12 +14,12 @@ public class UploadResponse {
         this.originalFileName = originalFileName;
     }
 
-    public String getYandexDiskUrl() {
-        return yandexDiskUrl;
+    public String getPreview() {
+        return preview;
     }
 
-    public void setYandexDiskUrl(String yandexDiskUrl) {
-        this.yandexDiskUrl = yandexDiskUrl;
+    public void setPreview(String preview) {
+        this.preview = preview;
     }
 
     public void setGeneratedFileName(String newFileName) {
