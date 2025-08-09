@@ -84,7 +84,7 @@
         /* User Info Section */
         .user-profile {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 30px;
             margin-bottom: 30px;
         }
@@ -311,9 +311,30 @@
         }
 
         .activity-list {
+            max-height: 400px; /* Фиксированная высота */
+            overflow-y: auto;  /* Вертикальный скролл при необходимости */
             list-style: none;
             padding: 0;
             margin: 0;
+        }
+
+        /* Стилизация скроллбара (опционально) */
+        .activity-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .activity-item {
@@ -365,10 +386,27 @@
             font-weight: 500;
         }
 
+        .activity-text-NaN{
+            color: var(--dark-gray);
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
         .activity-time {
             color: var(--gray);
             font-size: 13px;
             margin-top: 4px;
+        }
+
+        .task-link {
+            color: #3366ff; /*//primary*/
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .task-link:hover {
+            text-decoration: underline;
+            color: #254eda;
         }
 
         /* Save Button */
@@ -493,7 +531,7 @@
                 transform: translateX(0);
             }
             to {
-                transform: translateX(5px);
+                transform: translateX(10px);
             }
         }
 
@@ -638,7 +676,34 @@
                 </div>
             </li>
 
-            <!--Заглушка-->
+            <li th:if="${lastComment != null}" class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-comment-alt"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-text">
+                        Оставлен комментарий:
+                        <span th:text="${lastComment.text}"></span>
+                        (к задаче:
+                        <a th:href="@{/projects/{projectId}/tasks/{id}(id=${lastComment.task.id}, projectId=${lastComment.task.project.id})}"
+                           th:text="${lastComment.task.title}"
+                           class="task-link"></a>)
+                    </p>
+                    <p class="activity-time"
+                       th:text="${#temporals.format(lastComment.createdAt, 'dd MMM HH:mm')}">
+                    </p>
+                </div>
+            </li>
+
+            <!-- Заглушка, если нет активности -->
+            <li th:if="${#lists.isEmpty(lastTaskHistoryChanges) and lastComment == null}"
+                class="activity-item">
+                <div class="activity-content">
+                    <p class="activity-text-NaN">Нет последней активности</p>
+                </div>
+            </li>
+
+<!--            &lt;!&ndash;Заглушка&ndash;&gt;
             <li class="activity-item">
                 <div class="activity-icon-todo">
                     <i class="fas fa-check-circle"></i>
@@ -648,7 +713,7 @@
                     <p class="activity-time">2 часа назад</p>
                 </div>
             </li>
-            <!--Заглушка-->
+            &lt;!&ndash;Заглушка&ndash;&gt;
             <li class="activity-item">
                 <div class="activity-icon-todo">
                     <i class="fas fa-plus-circle"></i>
@@ -658,7 +723,7 @@
                     <p class="activity-time">5 часов назад</p>
                 </div>
             </li>
-            <!--Заглушка-->
+            &lt;!&ndash;Заглушка&ndash;&gt;
             <li class="activity-item">
                 <div class="activity-icon-todo">
                     <i class="fas fa-comment-alt"></i>
@@ -667,7 +732,7 @@
                     <p class="activity-text">Оставлен комментарий к задаче "Обновить логотип"</p>
                     <p class="activity-time">Вчера, 14:30</p>
                 </div>
-            </li>
+            </li>-->
 
         </ul>
     </div>

@@ -93,10 +93,11 @@ public class TaskController {
         }
         User creator = task.getCreator();
         User assignee = task.getAssignee();
-        boolean isCreatorOrAssignee = false;
-        if(currentUser.equals(creator) || currentUser.equals(assignee)){
-            isCreatorOrAssignee = true;
-        };
+        boolean isCreatorOrAssignee = currentUser.equals(creator) || currentUser.equals(assignee);
+
+        if (!isAdminOrModerator) {
+            return "redirect:/projects/" + projectId; // Если нет, перенаправляем на страницу проекта
+        }
 
         model.addAttribute("task", task);
         model.addAttribute("taskStatus",TaskStatus.values());

@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${task.title} + ' | TaskFlow'">Задача | TaskFlow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/styles/sidebar.css}">
@@ -57,8 +58,14 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page-header {
@@ -82,7 +89,7 @@
             transition: var(--transition);
         }
 
-        .btn-back-my-tasks, .btn-back-project-tasks{
+        .btn-back-my-tasks, .btn-back-project-tasks {
             text-decoration: none;
             color: var(--primary);
             font-size: 13px;
@@ -94,7 +101,8 @@
             border-radius: var(--border-radius);
             transition: var(--transition);
         }
-        .btn-back-my-tasks:hover, .btn-back-project-tasks:hover{
+
+        .btn-back-my-tasks:hover, .btn-back-project-tasks:hover {
             background-color: var(--light-gray);
         }
 
@@ -188,12 +196,29 @@
             display: inline-block;
         }
 
-        .status-NEW { background-color: var(--gray); }
-        .status-IN_PROGRESS { background-color: var(--info); }
-        .status-REVIEW { background-color: var(--purple); }
-        .status-COMPLETED { background-color: var(--secondary); }
-        .status-ON_HOLD { background-color: var(--warning); }
-        .status-CANCELED { background-color: var(--danger); }
+        .status-NEW {
+            background-color: var(--gray);
+        }
+
+        .status-IN_PROGRESS {
+            background-color: var(--info);
+        }
+
+        .status-REVIEW {
+            background-color: var(--purple);
+        }
+
+        .status-COMPLETED {
+            background-color: var(--secondary);
+        }
+
+        .status-ON_HOLD {
+            background-color: var(--warning);
+        }
+
+        .status-CANCELED {
+            background-color: var(--danger);
+        }
 
         .status-dropdown {
             position: absolute;
@@ -440,14 +465,6 @@
 <div class="main-content">
     <div class="container">
         <div class="page-header">
-            <!--<div class="back-actions">
-                <a th:href="@{/my-tasks}" class="btn-back-my-tasks">
-                    <i class=""></i> Мои задачи
-                </a>
-                <a th:href="@{/projects/{projectId}/tasks(projectId=${task.project.id})}" class="btn-back-project-tasks">
-                    <i class=""></i> Задачи проекта
-                </a>
-            </div>-->
             <button type="button" class="btn-back" onclick="window.history.back()">
                 <i class="fas fa-arrow-left"></i> Назад
             </button>
@@ -463,7 +480,8 @@
         <div class="task-details">
             <div class="detail-card">
                 <div class="detail-label">Статус</div>
-                <div class="status-container" th:classappend="${ not(isAdminOrModerator or isCreatorOrAssignee)} ? 'disabled'">
+                <div class="status-container"
+                     th:classappend="${ not(isAdminOrModerator or isCreatorOrAssignee)} ? 'disabled'">
                     <div th:classappend="${'status-' + task.status}" class="status"
                          th:onclick="${isAdminOrModerator or isCreatorOrAssignee} ? 'showStatusOptions(this)' : ''"
                          th:data-task-id="${task.id}" th:data-project-id="${projectId}">
@@ -544,7 +562,9 @@
                 </h3>
 
                 <div class="comment-form">
-                    <form id="commentForm" th:action="@{/projects/{projectId}/tasks/{id}/comments(id=${task.id},projectId=${projectId})}" method="post">
+                    <form id="commentForm"
+                          th:action="@{/projects/{projectId}/tasks/{id}/comments(id=${task.id},projectId=${projectId})}"
+                          method="post">
         <textarea name="commentText" id="commentText" placeholder="Напишите комментарий..." required maxlength="500"
                   oninput="updateCharCount(this)"></textarea>
                         <div class="char-counter"><span class="char-count">0 / 500</span></div>
@@ -558,7 +578,8 @@
                     <div th:each="comment : ${task.comments}" class="comment">
                         <div class="comment-header">
                             <span class="comment-author" th:text="${comment.author.username}"></span>
-                            <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                            <span class="comment-date"
+                                  th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
                         </div>
                         <div class="comment-text" th:text="${comment.text}"></div>
                     </div>
@@ -577,10 +598,12 @@
                 </div>
 
                 <div class="history-list" id="history-content">
-                    <div th:each="history : ${taskHistory}" class="history-item" th:attr="data-timestamp=${#temporals.format(history.timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                    <div th:each="history : ${taskHistory}" class="history-item"
+                         th:attr="data-timestamp=${#temporals.format(history.timestamp, 'yyyy-MM-dd HH:mm:ss')}">
                         <div class="history-header">
                             <span class="history-user" th:text="${history.user.username}"></span>
-                            <span class="history-date" th:text="${#temporals.format(history.timestamp, 'dd.MM.yyyy HH:mm')}"></span>
+                            <span class="history-date"
+                                  th:text="${#temporals.format(history.timestamp, 'dd.MM.yyyy HH:mm')}"></span>
                         </div>
                         <div class="history-text" th:text="${history.description}"></div>
                     </div>
@@ -696,7 +719,7 @@
     }
 
     // Закрытие выпадающего списка при клике вне его
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!e.target.closest('.status-container')) {
             document.querySelectorAll('.status-dropdown').forEach(d => {
                 d.classList.remove('show');
@@ -711,7 +734,7 @@
     }
 
     // Обработка комментариев
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         const textarea = document.querySelector('textarea[name="commentText"]');
         if (textarea) {
@@ -720,7 +743,7 @@
 
         const commentForm = document.getElementById('commentForm');
         if (commentForm) {
-            commentForm.addEventListener('submit', function(e) {
+            commentForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 submitComment();
             });
@@ -916,10 +939,10 @@
     const project = {
         id: /*[[${project.id}]]*/ 0,
     };
-    const user= {
+    const user = {
         username: /*[[${#authentication.name}]]*/ 0,
     };
-    const isMemberCheck= {
+    const isMemberCheck = {
         value: /*[[${isMember}]]*/ false,
     };
     /*]]>*/

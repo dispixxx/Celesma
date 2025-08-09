@@ -6,6 +6,8 @@ import com.disp.celesmaproject.service.CustomUserDetailsService;
 import com.disp.celesmaproject.service.TaskService;
 import com.disp.celesmaproject.util.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -28,9 +30,11 @@ public class CommentController {
 
     @GetMapping
     @ResponseBody
-    public List<Comment> getComments(@PathVariable Long taskId) {
-        return commentService.getCommentsByTaskId(taskId);
+    public ResponseEntity<List<Comment>> getComments(@PathVariable Long taskId) {
+        List<Comment> comments =  commentService.getCommentsByTaskId(taskId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
+
 
     @PostMapping
     public String addComment(@PathVariable Long projectId, @PathVariable Long taskId,

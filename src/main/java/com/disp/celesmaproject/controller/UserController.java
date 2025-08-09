@@ -20,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 public class UserController {
@@ -41,34 +43,8 @@ public class UserController {
     @Autowired
     private YandexDiskService yandexDiskService;
 
-/*    //Свой профиль
-    @GetMapping("/user/profile")
-    public String viewUserProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = authenticationFacade.getAuthenticatedUsername();
-        User currentUser = userDetailsService.getUserByUsername(username);
-        String userEmail = currentUser.getEmail();
-        String userFirstName = currentUser.getFirstName();
-        String userLastName = currentUser.getLastName();
-
-        // Получаем данные о проектах и задачах
-        int projectCount = projectService.getUserProjectCount(currentUser.getId());
-        int taskCountAsAssignee = taskService.getTaskCountByAssignee(currentUser.getId());
-        int taskCountAsCreator = taskService.getTaskCountByCreator(currentUser.getId());
-        int completedTaskCount = taskService.getCompletedTaskCountByUser(currentUser.getId());
-
-        model.addAttribute("userFirstName", Objects.requireNonNullElse(userFirstName, "[FIRSTNAME]"));
-        model.addAttribute("userLastName", Objects.requireNonNullElse(userLastName, "[LASTNAME]"));
-        model.addAttribute("username", username);
-        model.addAttribute("userEmail", userEmail);
-
-        // Добавляем данные для статистики
-        model.addAttribute("projectCount", projectCount);
-        model.addAttribute("taskCountAsAssignee", taskCountAsAssignee);
-        model.addAttribute("taskCountAsCreator", taskCountAsCreator);
-        model.addAttribute("completedTaskCount", completedTaskCount);
-
-        return "user_profile";
-    }*/
+    @Autowired
+    private CommentService commentService;
 
     @GetMapping("/user/profile/{username}")
     public String viewUserProfile(
@@ -89,16 +65,15 @@ public class UserController {
                 authenticationFacade.getAuthenticatedUsername()
         );
 
-        // Проверка прав доступа (если нужно)
         boolean isOwner = currentUser != null && currentUser.getId().equals(profileUser.getId());
         model.addAttribute("isOwner", isOwner);
 
-        String highQualityProfileUserPictureUrl = profileUser.getAvatarUrl() != null ? profileUser.getAvatarUrl().replace("s96-c", "s512-c"): null;
+        String highQualityProfileUserPictureUrl = profileUser.getAvatarUrl() != null ? profileUser.getAvatarUrl().replace("s96-c", "s512-c") : null;
 
         // Заполнение модели
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("user", currentUser);
-        model.addAttribute("profileUserBigAvatarUrl",highQualityProfileUserPictureUrl);
+        model.addAttribute("profileUserBigAvatarUrl", highQualityProfileUserPictureUrl);
         model.addAttribute("userFirstName", profileUser.getFirstName());
         model.addAttribute("userLastName", profileUser.getLastName());
         model.addAttribute("username", username);
@@ -111,11 +86,18 @@ public class UserController {
         model.addAttribute("completedTaskCount", taskService.getCompletedTaskCountByUser(profileUser.getId()));
 
         //Активность
-        assert currentUser != null;
-//        Comment lastComment = commentService.getLastCommentByUserId(currentUser.getId());
+        Comment lastComment = commentService.getLastCommentByUserId(Objects.requireNonNull(profileUser.getId()));
+
         List<TaskHistory> taskHistoryChanges = taskService.getLastTaskHistoryByUserId(profileUser.getId());
-        List<TaskHistory> lastTaskHistoryChanges = taskHistoryChanges.subList(0, taskHistoryChanges.size() - 1);
+        List<TaskHistory> lastTaskHistoryChanges = Collections.emptyList();
+        if (taskHistoryChanges.size() > 3) {
+            lastTaskHistoryChanges = taskHistoryChanges.reversed().subList(0, 3);
+        } else {
+            lastTaskHistoryChanges = taskHistoryChanges.reversed();
+        }
+
         model.addAttribute("lastTaskHistoryChanges", lastTaskHistoryChanges);
+        model.addAttribute("lastComment", lastComment);
         return "user_profile";
     }
 
@@ -138,7 +120,7 @@ public class UserController {
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 validateAvatarFile(avatarFile);
                 User user = userDetailsService.getUserByUsername(username);
-                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile,user).getPreview();
+                String avatarUrl = yandexDiskService.uploadFileToYandexDisk(avatarFile, user).getPreview();
                 if (!avatarUrl.isEmpty()) profileDto.setAvatarUrl(avatarUrl);
             }
             User updatedUser = userDetailsService.updateUserProfile(profileDto);

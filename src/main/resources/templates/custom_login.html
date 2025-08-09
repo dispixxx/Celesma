@@ -142,8 +142,6 @@
 </head>
 <body>
 <div class="container">
-<!--  <img src="Dropbox_Icon.svg.png" alt="celesmaLogo" class="logo">-->
-<!--  <img src=/image/logo.png alt=изображение>-->
   <h1>Авторизация</h1>
 
   <!-- Блок для отображения ошибки -->
@@ -166,9 +164,9 @@
   <form th:action="@{/login}" method="post">
 <!--    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>-->
 <!--    <label for="username">Username:</label>-->
-    <input type="text" id="username" name="username" placeholder="Логин" required>
+    <label for="username"></label><input type="text" id="username" name="username" placeholder="Логин" required>
 <!--    <label for="password">Password:</label>-->
-    <input type="password" id="password" name="password" placeholder="Пароль" required>
+    <label for="password"></label><input type="password" id="password" name="password" placeholder="Пароль" required>
 
     <button type="submit" class="button">Войти</button>
   </form>

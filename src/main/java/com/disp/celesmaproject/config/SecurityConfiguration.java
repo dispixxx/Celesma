@@ -97,10 +97,10 @@ public class SecurityConfiguration {
                 .build();
     }*/
 
-/*    @Bean
+    @Bean
     WebSecurityCustomizer configureWebSecurity() {
         return (web) -> web.ignoring().requestMatchers("/image/**", "/js/**", "/css/**", "/webjars/**");
-    }*/
+    }
 
 /*//    InMemoryUserAuth
     @Bean

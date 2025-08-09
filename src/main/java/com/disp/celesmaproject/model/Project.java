@@ -1,18 +1,11 @@
 package com.disp.celesmaproject.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashSet;
 import java.util.Set;
 
 
 @Entity
-@Data
-@Getter
-@Setter
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

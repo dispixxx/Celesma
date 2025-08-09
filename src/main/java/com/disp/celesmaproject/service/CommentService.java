@@ -25,18 +25,18 @@ public class CommentService {
 
     public Comment addComment(Comment comment) {
         comment.setCreatedAt(LocalDateTime.now());
-        TaskHistory history = new TaskHistory();
+//        TaskHistory history = new TaskHistory();
         Task task = comment.getTask();
-        history.setTask(task);
-        history.setUser(comment.getAuthor());
-        history.setTimestamp(comment.getCreatedAt());
-        history.setDescription("Добавлен комментарий: " + comment.getText());
-        task.getHistory().add(history);
+//        history.setTask(task);
+//        history.setUser(comment.getAuthor());
+//        history.setTimestamp(comment.getCreatedAt());
+//        history.setDescription("Добавлен комментарий: " + comment.getText());
+//        task.getHistory().add(history);
         taskRepository.save(task);
         return commentRepository.save(comment);
     }
 
     public Comment getLastCommentByUserId(Long userId) {
-        return commentRepository.findTop1ByAuthorIdOrderByCreatedAtDesc(userId).orElseThrow(null);
+        return commentRepository.findTop1ByAuthorIdOrderByCreatedAtDesc(userId).orElse(null);
     }
 }
